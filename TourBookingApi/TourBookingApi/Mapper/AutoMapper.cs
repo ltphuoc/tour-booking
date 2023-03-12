@@ -13,7 +13,8 @@ namespace TourBookingApi.Mapper
             CreateMap<Account, AccountRequest>().ReverseMap();
             CreateMap<Account, AccountResponse>().ReverseMap();
 
-
+            CreateMap<Account, AccountCreateRequest>().ReverseMap();
+            CreateMap<Account, AccountUpdateResquest>().ReverseMap();
         }
 
     }

@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BusinessObject.Models;
-using DataAccess.Services;
+﻿using BusinessObject.Models;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
-using System.ComponentModel.DataAnnotations;
+using DataAccess.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace TourBookingApi.Controllers
 {
@@ -18,19 +12,19 @@ namespace TourBookingApi.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly TourBookingContext _context;
-        private readonly IAccountServices accountServices;
+        private readonly IAccountServices _accountServices;
 
         public AccountsController(TourBookingContext context, IAccountServices accountServices)
         {
             _context = context;
-            this.accountServices = accountServices;
+            _accountServices = accountServices;
         }
 
         // GET: api/Accounts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
+        public ActionResult<IEnumerable<Account>> GetAccounts([FromQuery] PagingRequest request)
         {
-            var result = accountServices.GetAll();
+            var result = _accountServices.GetAll(request);
             return Ok(result);
         }
 
@@ -38,75 +32,50 @@ namespace TourBookingApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(int id)
         {
-            var account = await _context.Accounts.FindAsync(id);
-
-            if (account == null)
-            {
-                return NotFound();
-            }
-
-            return account;
+            var result = _accountServices.Get(id);
+            return Ok(result);
         }
 
         // PUT: api/Accounts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccount(int id, Account account)
+        public async Task<IActionResult> PutAccount(int id, AccountUpdateResquest account)
         {
-            if (id != account.Id)
+            var result = _accountServices.Update(id, account).Result;
+            if (result.Status.Code != HttpStatusCode.OK)
             {
-                return BadRequest();
+                return BadRequest(result);
             }
-
-            _context.Entry(account).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AccountExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(result);
         }
 
         // POST: api/Accounts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<AccountResponse>> PostAccount(AccountRequest account)
+        public async Task<ActionResult<AccountResponse>> PostAccount(AccountCreateRequest account)
         {
-            var response = await accountServices.Create(account);
-            return Ok(response);
+            var result = await _accountServices.Create(account);
+            if (result.Status.Code != HttpStatusCode.Created)
+            {
+                return BadRequest(result);
+            }
+            return Created("", result);
         }
 
         // DELETE: api/Accounts/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(int id)
         {
-            var account = await _context.Accounts.FindAsync(id);
-            if (account == null)
+            var result = _accountServices.Delete(id).Result;
+            if (result.Status.Code == HttpStatusCode.NotFound)
             {
-                return NotFound();
+                return NotFound(result);
             }
-
-            _context.Accounts.Remove(account);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool AccountExists(int id)
-        {
-            return _context.Accounts.Any(e => e.Id == id);
+            else if (result.Status.Code == HttpStatusCode.BadRequest)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
         }
     }
 }
