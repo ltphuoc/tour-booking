@@ -22,7 +22,8 @@ namespace DataAccess.Helpers
             .As(typeof(IGenericRepository<>))
             .InstancePerLifetimeScope();
 
-            builder.RegisterType<AccountService>().As<IAccountServices>();
+            builder.RegisterType<AccountServices>().As<IAccountServices>();
+            builder.RegisterType<DestinationServices>().As<IDestinationServices>();
         }
     }
 }

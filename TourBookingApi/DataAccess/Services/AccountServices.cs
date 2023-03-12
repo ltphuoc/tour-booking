@@ -20,13 +20,13 @@ namespace DataAccess.Services
         Task<BaseResponseViewModel<AccountResponse>> Create(AccountCreateRequest request);
     }
 
-    public class AccountService : IAccountServices
+    public class AccountServices : IAccountServices
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
 
-        public AccountService(IUnitOfWork unitOfWork, IMapper mapper)
+        public AccountServices(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
