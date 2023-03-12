@@ -21,7 +21,7 @@ namespace BusinessObject.Models
         public virtual DbSet<Destination> Destinations { get; set; } = null!;
         public virtual DbSet<DestinationImage> DestinationImages { get; set; } = null!;
         public virtual DbSet<Payment> Payments { get; set; } = null!;
-        public virtual DbSet<Role> Roles { get; set; } = null!;
+        //public virtual DbSet<Role> Roles { get; set; } = null!;
         public virtual DbSet<Tour> Tours { get; set; } = null!;
         public virtual DbSet<TourDetail> TourDetails { get; set; } = null!;
         public virtual DbSet<TourGuide> TourGuides { get; set; } = null!;
@@ -179,25 +179,25 @@ namespace BusinessObject.Models
                     .HasConstraintName("FK__Payment__booking__66603565");
             });
 
-            modelBuilder.Entity<Role>(entity =>
-            {
-                entity.HasNoKey();
+            //modelBuilder.Entity<Role>(entity =>
+            //{
+            //    entity.HasNoKey();
 
-                entity.ToTable("Role");
+            //    entity.ToTable("Role");
 
-                entity.Property(e => e.AccountId).HasColumnName("accountID");
+            //    entity.Property(e => e.AccountId).HasColumnName("accountID");
 
-                entity.Property(e => e.Role1)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("role");
+            //    entity.Property(e => e.Role1)
+            //        .HasMaxLength(255)
+            //        .IsUnicode(false)
+            //        .HasColumnName("role");
 
-                entity.HasOne(d => d.Account)
-                    .WithMany()
-                    .HasForeignKey(d => d.AccountId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Role__accountID__5DCAEF64");
-            });
+            //    entity.HasOne(d => d.Account)
+            //        .WithMany()
+            //        .HasForeignKey(d => d.AccountId)
+            //        .OnDelete(DeleteBehavior.ClientSetNull)
+            //        .HasConstraintName("FK__Role__accountID__5DCAEF64");
+            //});
 
             modelBuilder.Entity<Tour>(entity =>
             {
