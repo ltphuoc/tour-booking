@@ -24,6 +24,8 @@ namespace DataAccess.Helpers
 
             builder.RegisterType<AccountServices>().As<IAccountServices>();
             builder.RegisterType<DestinationServices>().As<IDestinationServices>();
+            builder.RegisterType<TourServices>().As<ITourSevices>();
+
         }
     }
 }

@@ -20,9 +20,9 @@ namespace BusinessObject.Models
         public string Status { get; set; } = null!;
         public int TourGuideId { get; set; }
 
-        public virtual ICollection<Booking> Bookings { get; set; }
-        public virtual ICollection<TourDetail> TourDetails { get; set; }
-        public virtual ICollection<TourGuide> TourGuides { get; set; }
-        public virtual ICollection<TourPrice> TourPrices { get; set; }
+        public virtual ICollection<Booking> Bookings { get; set; } = null;
+        public virtual ICollection<TourDetail> TourDetails { get; set; } = null;
+        public virtual ICollection<TourGuide> TourGuides { get; set; } = null;
+        public virtual ICollection<TourPrice> TourPrices { get; set; } = null;
     }
 }
