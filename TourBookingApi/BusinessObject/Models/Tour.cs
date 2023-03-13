@@ -17,8 +17,8 @@ namespace BusinessObject.Models
         public string TourName { get; set; } = null!;
         public int TourDuration { get; set; }
         public int TourCapacity { get; set; }
-        public string Status { get; set; } = null!;
-        public int TourGuideId { get; set; }
+        public int Status { get; set; }
+        public int? TourGuideId { get; set; }
 
         public virtual ICollection<Booking> Bookings { get; set; } = null;
         public virtual ICollection<TourDetail> TourDetails { get; set; } = null;

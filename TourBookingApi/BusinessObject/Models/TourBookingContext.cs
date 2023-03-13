@@ -74,6 +74,29 @@ namespace BusinessObject.Models
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("phone");
+
+                entity.Property(e => e.City)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("city");
+
+                entity.Property(e => e.Province)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("province");
+
+                entity.Property(e => e.District)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("district");
+
+                entity.Property(e => e.Avatar)
+                    .IsUnicode(false)
+                    .HasColumnName("avatar");
+
+                entity.Property(e => e.Role).HasColumnName("role");
+
+                entity.Property(e => e.Status).HasColumnName("status");
             });
 
             modelBuilder.Entity<Booking>(entity =>
@@ -205,10 +228,7 @@ namespace BusinessObject.Models
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.Status)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("status");
+                entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.TourCapacity).HasColumnName("tour_capacity");
 
