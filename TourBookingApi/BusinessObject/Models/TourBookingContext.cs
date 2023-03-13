@@ -155,6 +155,8 @@ namespace BusinessObject.Models
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("region");
+
+                entity.Property(e => e.Status).HasColumnName("status");
             });
 
             modelBuilder.Entity<DestinationImage>(entity =>
