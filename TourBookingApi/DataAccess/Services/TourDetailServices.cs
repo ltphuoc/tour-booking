@@ -13,54 +13,55 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Services
 {
-    public interface ITourSevices
+    public interface ITourDetailSevices
     {
-        BaseResponsePagingViewModel<Tour> GetAll(PagingRequest request);
-        BaseResponseViewModel<Tour> Get(int id);
-        Task<BaseResponseViewModel<Tour>> Update(int id, TourUpdateRequest request);
-        Task<BaseResponseViewModel<Tour>> Create(TourCreateRequest request);
-        Task<BaseResponseViewModel<Tour>> Delete(int id);
+        BaseResponsePagingViewModel<TourDetail> GetAll(PagingRequest request);
+        BaseResponseViewModel<TourDetail> Get(int id);
+        Task<BaseResponseViewModel<TourDetail>> Update(int id, TourDetailUpdateRequest request);
+        Task<BaseResponseViewModel<TourDetail>> Create(TourDetailCreateRequest request);
+        Task<BaseResponseViewModel<TourDetail>> Delete(int id);
 
     }
-    public class TourServices : ITourSevices
+
+    public class TourDetailServices : ITourDetailSevices
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public TourServices(IUnitOfWork unitOfWork, IMapper mapper)
+        public TourDetailServices(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public BaseResponsePagingViewModel<Tour> GetAll(PagingRequest request)
+        public BaseResponsePagingViewModel<TourDetail> GetAll(PagingRequest request)
         {
-            var tours = _unitOfWork.Repository<Tour>()
+            var tourdetails = _unitOfWork.Repository<TourDetail>()
                                 .GetAll()
                                 /*.Include(d => d.DestinationImages)*/
                                 /*.ProjectTo<DestinationResponse>(_mapper.ConfigurationProvider)*/
                                 .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
 
-            return new BaseResponsePagingViewModel<Tour>
+            return new BaseResponsePagingViewModel<TourDetail>
             {
                 Metadata = new PagingsMetadata()
                 {
                     Page = request.Page,
                     Size = request.PageSize,
-                    Total = tours.Item1
+                    Total = tourdetails.Item1
                 },
-                Data = tours.Item2.ToList(),
+                Data = tourdetails.Item2.ToList(),
             };
         }
 
-        public async Task<BaseResponseViewModel<Tour>> Create(TourRequest request)
+        public async Task<BaseResponseViewModel<TourDetail>> Create(TourDetailRequest request)
         {
             try
             {
-                var tour = _mapper.Map<Tour>(request);
+                var tourdetail = _mapper.Map<TourDetail>(request);
 
                 try
                 {
-                    await _unitOfWork.Repository<Tour>().InsertAsync(tour);
+                    await _unitOfWork.Repository<TourDetail>().InsertAsync(tourdetail);
                     await _unitOfWork.CommitAsync();
                 }
                 catch (Exception ex)
@@ -68,7 +69,7 @@ namespace DataAccess.Services
                     throw new Exception(ex.Message);
                 }
 
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
@@ -76,12 +77,12 @@ namespace DataAccess.Services
                         Message = "Created",
                         IsSuccess = true
                     },
-                    Data = _mapper.Map<Tour>(tour)
+                    Data = _mapper.Map<TourDetail>(tourdetail)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
@@ -95,12 +96,12 @@ namespace DataAccess.Services
 
         }
 
-        public BaseResponseViewModel<Tour> Get(int id)
+        public BaseResponseViewModel<TourDetail> Get(int id)
         {
-            var tour = GetById(id);
-            if (tour == null)
+            var tourdetail = GetById(id);
+            if (tourdetail == null)
             {
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
@@ -111,7 +112,7 @@ namespace DataAccess.Services
                     Data = null
                 };
             }
-            return new BaseResponseViewModel<Tour>
+            return new BaseResponseViewModel<TourDetail>
             {
                 Status = new StatusViewModel
                 {
@@ -119,24 +120,24 @@ namespace DataAccess.Services
                     Message = "OK",
                     IsSuccess = true
                 },
-                Data = _mapper.Map<Tour>(tour)
+                Data = _mapper.Map<TourDetail>(tourdetail)
             };
         }
 
-        private Tour GetById(int id)
+        private TourDetail GetById(int id)
         {
-            var tour = _unitOfWork.Repository<Tour>().GetById(id).Result;
-            var result = _mapper.Map<Tour>(tour);
+            var tourdetail = _unitOfWork.Repository<TourDetail>().GetById(id).Result;
+            var result = _mapper.Map<TourDetail>(tourdetail);
             return result;
         }
 
-        public async Task<BaseResponseViewModel<Tour>> Update(int id, TourUpdateRequest request)
+        public async Task<BaseResponseViewModel<TourDetail>> Update(int id, TourDetailUpdateRequest request)
         {
-            var tour = GetById(id);
-            var tourResponse = _mapper.Map<Tour>(tour);
-            if (tour == null)
+            var tourdetail = GetById(id);
+            var tourDetailResponse = _mapper.Map<TourDetail>(tourdetail);
+            if (tourdetail == null)
             {
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
@@ -149,11 +150,11 @@ namespace DataAccess.Services
             }
             try
             {
-                var updateTour = _mapper.Map<TourUpdateRequest, Tour>(request, tourResponse);
-                await _unitOfWork.Repository<Tour>().UpdateDetached(updateTour);
+                var updateTourDetail = _mapper.Map<TourDetailUpdateRequest, TourDetail>(request, tourDetailResponse);
+                await _unitOfWork.Repository<TourDetail>().UpdateDetached(updateTourDetail);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
@@ -161,12 +162,12 @@ namespace DataAccess.Services
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = updateTour
+                    Data = updateTourDetail
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
@@ -179,15 +180,15 @@ namespace DataAccess.Services
             }
         }
 
-        public async Task<BaseResponseViewModel<Tour>> Create(TourCreateRequest request)
+        public async Task<BaseResponseViewModel<TourDetail>> Create(TourDetailCreateRequest request)
         {
             try
             {
-                var tour = _mapper.Map<Tour>(request);
+                var tourdetail = _mapper.Map<TourDetail>(request);
 
                 try
                 {
-                    await _unitOfWork.Repository<Tour>().InsertAsync(tour);
+                    await _unitOfWork.Repository<TourDetail>().InsertAsync(tourdetail);
                     await _unitOfWork.CommitAsync();
                 }
                 catch (Exception ex)
@@ -195,7 +196,7 @@ namespace DataAccess.Services
                     throw new Exception(ex.Message);
                 }
 
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
@@ -203,12 +204,12 @@ namespace DataAccess.Services
                         Message = "Created",
                         IsSuccess = true
                     },
-                    Data = _mapper.Map<Tour>(tour)
+                    Data = _mapper.Map<TourDetail>(tourdetail)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
@@ -221,12 +222,12 @@ namespace DataAccess.Services
             }
         }
 
-        public async Task<BaseResponseViewModel<Tour>> Delete(int id)
+        public async Task<BaseResponseViewModel<TourDetail>> Delete(int id)
         {
-            var tour = GetById(id);
-            if (tour == null)
+            var tourdetail = GetById(id);
+            if (tourdetail == null)
             {
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
@@ -239,31 +240,26 @@ namespace DataAccess.Services
             }
             try
             {
-                var bookings = tour.Bookings.ToList();
-                foreach (var booking in bookings)
+                var destinations = tourdetail.Destination;
+                if (destinations != null)
                 {
-                    _unitOfWork.Repository<Booking>().Delete(booking);
+                    _unitOfWork.Repository<Destination>().Delete(destinations);
                 }
-                var tourDetails = tour.TourDetails.ToList();
-                foreach (var tourDetail in tourDetails)
+                var tours = tourdetail.Tour;
+                if (tours != null)
                 {
-                    _unitOfWork.Repository<TourDetail>().Delete(tourDetail);
+                    _unitOfWork.Repository<Tour>().Delete(tours);
                 }
-                var tourPrices = tour.TourPrices.ToList();
-                foreach (var tourPrice in tourPrices)
+                var transports = tourdetail.Transportation;
+                if (transports != null)
                 {
-                    _unitOfWork.Repository<TourPrice>().Delete(tourPrice);
-                }
-                var tourGuides = tour.TourGuides.ToList();
-                foreach (var tourGuide in tourGuides)
-                {
-                    _unitOfWork.Repository<TourGuide>().Delete(tourGuide);
+                    _unitOfWork.Repository<Transportation>().Delete(transports);
                 }
 
-                _unitOfWork.Repository<Tour>().Delete(tour);
+                _unitOfWork.Repository<TourDetail>().Delete(tourdetail);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
@@ -276,7 +272,7 @@ namespace DataAccess.Services
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Tour>
+                return new BaseResponseViewModel<TourDetail>
                 {
                     Status = new StatusViewModel
                     {
