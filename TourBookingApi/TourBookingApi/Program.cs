@@ -54,7 +54,7 @@ service.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "ToursBooking API",
+        Title = "Tour Booking API",
         Version = "v1"
     });
     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());

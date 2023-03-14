@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using BusinessObject.Repository;
 using BusinessObject.UnitOfWork;
+using BusinessObjects.Services;
 using DataAccess.Services;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,8 @@ namespace DataAccess.Helpers
             builder.RegisterType<AccountServices>().As<IAccountServices>();
             builder.RegisterType<DestinationServices>().As<IDestinationServices>();
             builder.RegisterType<TourServices>().As<ITourSevices>();
+            builder.RegisterType<AuthServices>().As<IAuthServices>();
+            builder.RegisterType<JwtAuthenticationManager>();
             builder.RegisterType<BookingServices>().As<IBookingSevices>();
             builder.RegisterType<TourDetailServices>().As<ITourDetailSevices>();
             builder.RegisterType<TourGuideServices>().As<ITourGuideSevices>();
