@@ -17,7 +17,7 @@ namespace DataAccess.Services
 {
     public interface IAuthServices
     {
-        Task<BaseResponseViewModel<AccountResponse>> LoginWithGoogle(ExternalAuthRequest data);
+        Task<BaseResponseViewModel<JwtAuthResponse>> LoginWithGoogle(ExternalAuthRequest data);
         Task<BaseResponseViewModel<JwtAuthResponse>> Login(LoginRequest request);
         Task<BaseResponseViewModel<AccountResponse>> Register(RegisterRequest request);
         Task<BaseResponseViewModel<AccountResponse>> ChangePassword(ChangePasswordRequest request);
@@ -38,15 +38,15 @@ namespace DataAccess.Services
             _configuration = configuration;
         }
 
-        public async Task<BaseResponseViewModel<AccountResponse>> LoginWithGoogle(ExternalAuthRequest data)
+        public async Task<BaseResponseViewModel<JwtAuthResponse>> LoginWithGoogle(ExternalAuthRequest data)
         {
             var auth = FirebaseAuth.DefaultInstance;
             FirebaseToken decodeToken = await auth.VerifyIdTokenAsync(data.IdToken);
             UserRecord userRecord = await auth.GetUserAsync(decodeToken.Uid);
 
-            var account = await GetAccountByEmail(userRecord.Email);
+            var accountDb = await GetAccountByEmail(userRecord.Email);
 
-            if (account.Data == null)
+            if (accountDb.Data == null)
             {
                 AccountCreateRequest model = new AccountCreateRequest()
                 {
@@ -57,21 +57,38 @@ namespace DataAccess.Services
                     Avatar = userRecord.PhotoUrl
 
                 };
-                account = await _accountServices.Create(model);
+                accountDb = await _accountServices.Create(model);
             }
-            else if (account.Status.Code == HttpStatusCode.NotFound)
+            else if (accountDb.Status.Code == HttpStatusCode.NotFound)
             {
-                return account;
+                return new BaseResponseViewModel<JwtAuthResponse>
+                {
+                    Status = new StatusViewModel()
+                    {
+                        Message = "Login success",
+                        IsSuccess = false,
+                        Code = HttpStatusCode.NotFound,
+                    },
+                }; ;
             }
-            return new BaseResponseViewModel<AccountResponse>()
+
+            var account = _mapper.Map<AccountResponse>(accountDb.Data);
+
+            var newToken = JwtAuthenticationManager.GenerateJwtToken(account.Email, account.Role.ToString(), account.Id.ToString(), _configuration);
+
+            return new BaseResponseViewModel<JwtAuthResponse>
             {
                 Status = new StatusViewModel()
                 {
-                    Message = "Success",
+                    Message = "Login success",
                     IsSuccess = true,
                     Code = HttpStatusCode.OK,
                 },
-                Data = _mapper.Map<AccountResponse>(account.Data)
+                Data = new JwtAuthResponse
+                {
+                    Token = newToken,
+                    UserName = account.Email,
+                }
             };
         }
 
@@ -172,7 +189,7 @@ namespace DataAccess.Services
                 Data = new JwtAuthResponse
                 {
                     Token = newToken,
-                    UserName = string.IsNullOrEmpty(account.Email) ? "" : account.Email,
+                    UserName = account.Email,
                 }
             };
         }

@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "tourbooking-ef1b0",
+  "private_key_id": "f93e3da1a787e9edad9c697a7fed942e371c6ab8",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDf9uraC4g4hpCQ\nHGS/5a9sU6HyOJskyMmXyfsMBQESJXCTnJE2lsV5xo2As2cKNcoXrZ1EiVXMl4QL\n3FmCobKPEtRFsyq75ErNrhuukAhTXNDZoMdNPa/xt+E0HTvexoW5VyRnCWRrUI5D\nVhfbRwCtKB4pPY/ErVyWyGNsyUyIkIr3a7tMpzSu5bxs5oboFKFIHeAzEF2seo0j\n9gSPANi6M92hXK6ytrhosd/Lz8t6kJq+hUzEDgwBkfSV6w1m29+HV9bAfqVJHM+H\nP/iXH9GwHPf9+nBGcPGy0ceuU1bdP7pk+JgGyQbbG8Uv6HSX2FazblpUBA0hhffx\n0eCLxndXAgMBAAECggEAAUObNlYLuhUl8+8TfhliRzBYdCdv1lVpyd9vRgIxn0Dl\n2BELD5QdrJ77X0dKWBgb08yV9cD4SOc8BnZQBp9tN61QB5quYMQcZflkss4H6TLx\nAzsK+1UgGczc/dacAJkw2dRzlXJ/BhoJmFJM+fhcuR15jU48vv8jGPJfMuOwXzIk\njQnzX4pXoPyzS9G7RAqBfBjBEkjJmDjhzlZlSUl7Y3Fi89K8A6e7VlcZBlQs8Ck2\nei7081gNa4KZPvBRWhB3NM5S/79oCHhr1VhUzpwyxfYK1YjLiDq9aBUvRAr2lraj\n35BVjjJC1en9DVpDY86VcSB+e+dYp2lgrOCZbD/zCQKBgQD7m8RjeQtLMI8mW7C4\nxqA5UB4oHe7YZxbTmdhx+AIrRYWLHy6IkJ9S0LRqiqFIS6UlV1ObuLj411Ts2JRx\nhf/oSvAjS/qUJmnUPOUqvp7YraffGU1BVhSuXORXa+FPIzP0xzvFG1PxlAD5zB/h\nkc6HB9cJmPkGE/RVw47iBQTcSQKBgQDj36HMT0XWt8KzVB10UV3B3joDoYNTb0bG\nvqSmZS/mviC55fy1ZpNIwN4hkFr3fxixr4/cKQU74phqRArDekfzT434MrIIxwfC\nN5+y9uHgDbo9PlmIwPjsva0cXE8gqGDEtrdpkHACQ0gUceQoq/Kpdcqo+OTappDP\n45qcfnh2nwKBgDsjhamLzefCZiMx8fu8U/SkrDHptzYOJQNfacx/6qKZGKZ2kc1v\nkMM6Yu2X4AjKHusD95bmeDOlCUUSMvHr+RZ0ZrUlKqSf0sgb+BFv9I4hYw/BNrNg\ntEO3ecRCixa6w3+JRLczkSt7Ci+sluHCD7UVVqne1sli708pQ/BEFbxhAoGAbTaX\nY0ZzIG++HxinbUI5/1q0z1yvhmOEtmhUnXNNu/dP1AkITyC0YmAdllSLZKdDfJW6\nCziVy5fUmMm3puyKY3CziEszzMUnUMw7/BgbNbkek4+4dbSXGU/nEfqj6fEJP/6a\ndTvGky8P8syLH3sZuGI+GTIA7VJ7gUeCqJJsxd0CgYBtWO6OLrI8YdiZyA1W/GVp\nCkW9nulB+onVROBq09pAVj1Gescrgu3zlhD0klbyeJv5/Eo5++n78LsuMZu3BApx\ndqCZKlwNIEUKml1HvAOUMnULlUkMJBgGAhZXSFn8g33En1pDY+5g8qIqB9CplXse\n874oaHYen6xbJqiLjlvo7Q==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-72iym@tourbooking-ef1b0.iam.gserviceaccount.com",
+  "client_id": "106052244478054545506",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-72iym%40tourbooking-ef1b0.iam.gserviceaccount.com"
+}

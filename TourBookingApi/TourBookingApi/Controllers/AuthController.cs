@@ -1,6 +1,6 @@
-﻿using BusinessObjects.Services;
+﻿using BusinessObjects.ResponseModels.Authentication;
+using BusinessObjects.Services;
 using DataAccess.DTO.Request;
-using DataAccess.DTO.Response;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +50,7 @@ namespace TourBookingApi.Controllers
         }
 
         [HttpPost("LoginWithGoogle")]
-        public async Task<ActionResult<AccountResponse>> LoginWithGoogle([FromBody] ExternalAuthRequest data)
+        public async Task<ActionResult<JwtAuthResponse>> LoginWithGoogle([FromBody] ExternalAuthRequest data)
         {
             try
             {

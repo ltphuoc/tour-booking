@@ -1,13 +1,12 @@
 using Autofac;
-using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
 using BusinessObject.MakeConnection;
 using DataAccess.Helpers;
-using Google.Apis.Auth.AspNetCore3;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using TourBookingApi.Mapper;
 
@@ -85,30 +84,19 @@ service.ConnectToConnectionString(builder.Configuration);
 
 
 #region JWT
+// Configure FirebaseApp with service account
+var pathToKey = Path.Combine(Directory.GetCurrentDirectory(), "Keys", "firebase.json");
+FirebaseApp.Create(new AppOptions
+{
+    Credential = GoogleCredential.FromFile(pathToKey)
+});
 
-//var appSettingsSection = builder.Configuration.GetSection("AppSettings");
-
-//service.Configure<AppSettings>(appSettingsSection);
-//var appSettings = appSettingsSection.Get<AppSettings>();
-
-//var key = Encoding.ASCII.GetBytes(appSettings.Secret);
-
-//service.AddAuthentication(x =>
-//{
-//    x.DefaultAuthenticateScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
-//    x.DefaultChallengeScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
-//});
-//var pathToKey = Path.Combine(Directory.GetCurrentDirectory(), "Keys", "firebase.json");
-//FirebaseApp.Create(new AppOptions
-//{
-//    Credential = GoogleCredential.FromFile(pathToKey)
-//});
-
-service.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+service.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters()
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
