@@ -52,49 +52,6 @@ namespace DataAccess.Services
             };
         }
 
-        public async Task<BaseResponseViewModel<TourPrice>> Create(TourPriceRequest request)
-        {
-            try
-            {
-                var tourPrice = _mapper.Map<TourPrice>(request);
-
-                try
-                {
-                    await _unitOfWork.Repository<TourPrice>().InsertAsync(tourPrice);
-                    await _unitOfWork.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
-
-                return new BaseResponseViewModel<TourPrice>
-                {
-                    Status = new StatusViewModel
-                    {
-                        Code = HttpStatusCode.Created,
-                        Message = "Created",
-                        IsSuccess = true
-                    },
-                    Data = _mapper.Map<TourPrice>(tourPrice)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseViewModel<TourPrice>
-                {
-                    Status = new StatusViewModel
-                    {
-                        Code = HttpStatusCode.BadRequest,
-                        Message = "Bad Request",
-                        IsSuccess = false
-                    },
-                    Data = null
-                };
-            }
-
-        }
-
         public BaseResponseViewModel<TourPrice> Get(int id)
         {
             var tourPrice = GetById(id);

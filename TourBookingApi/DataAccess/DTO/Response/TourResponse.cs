@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace DataAccess.DTO.Response
 {
-    public class DestinationResponse
+    public class TourResponse
     {
         public int Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string Region { get; set; } = null!;
-        public string Description { get; set; } = null!;
+        public string TourName { get; set; }
+        public int TourDuration { get; set; }
+        public int TourCapacity { get; set; }
         public int Status { get; set; }
-        public List<DestinationImageResponse> DestinationImages { get; set; }
+        public List<TourDetailResponse> TourDetails { get; set; }
     }
 }

@@ -24,6 +24,7 @@ namespace TourBookingApi.Mapper
             CreateMap<Destination, DestinationCreateRequest>().ReverseMap();
 
             CreateMap<Tour, TourRequest>().ReverseMap();
+            CreateMap<Tour, TourResponse>().ReverseMap();
             CreateMap<Tour, TourUpdateRequest>().ReverseMap();
             CreateMap<Tour, TourCreateRequest>().ReverseMap();
 
@@ -32,6 +33,7 @@ namespace TourBookingApi.Mapper
             CreateMap<Booking, BookingCreateRequest>().ReverseMap();
 
             CreateMap<TourDetail, TourDetailRequest>().ReverseMap();
+            CreateMap<TourDetail, TourDetailResponse>().ReverseMap();
             CreateMap<TourDetail, TourDetailUpdateRequest>().ReverseMap();
             CreateMap<TourDetail, TourDetailCreateRequest>().ReverseMap();
 
@@ -54,7 +56,7 @@ namespace TourBookingApi.Mapper
             CreateMap<DestinationImage, DestinationImageResponse>().ReverseMap();
             CreateMap<DestinationImage, DestinationImageRequest>().ReverseMap();
 
-            CreateMap<TourDetail, TourDetailResponse>().ReverseMap();
+            /*CreateMap<TourDetail, TourDetailResponse>().ReverseMap();*/
         }
     }
 }
