@@ -42,7 +42,6 @@ namespace BusinessObjects.Services
 
         public static string GenerateJwtToken(string username, string role, string userId, IConfiguration configuration)
         {
-            //create claims details based on the user information
             var claims = new[] {
                         new Claim(JwtRegisteredClaimNames.Sub, configuration["Jwt:Subject"]),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -58,7 +57,7 @@ namespace BusinessObjects.Services
                 configuration["Jwt:Issuer"],
                 configuration["Jwt:Audience"],
                 claims,
-                expires: DateTime.UtcNow.AddMinutes(10),
+                expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: signIn);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
