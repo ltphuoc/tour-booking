@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
 using System;
 using System.Collections.Generic;
@@ -15,11 +17,11 @@ namespace DataAccess.Services
 {
     public interface ITransportationSevices
     {
-        BaseResponsePagingViewModel<Transportation> GetAll(PagingRequest request);
-        BaseResponseViewModel<Transportation> Get(int id);
-        Task<BaseResponseViewModel<Transportation>> Update(int id, TransportationUpdateRequest request);
-        Task<BaseResponseViewModel<Transportation>> Create(TransportationCreateRequest request);
-        Task<BaseResponseViewModel<Transportation>> Delete(int id);
+        BaseResponsePagingViewModel<TransportationResponse> GetAll(PagingRequest request);
+        BaseResponseViewModel<TransportationResponse> Get(int id);
+        Task<BaseResponseViewModel<TransportationResponse>> Update(int id, TransportationUpdateRequest request);
+        Task<BaseResponseViewModel<TransportationResponse>> Create(TransportationCreateRequest request);
+        Task<BaseResponseViewModel<TransportationResponse>> Delete(int id);
 
     }
     public class TransportationServices : ITransportationSevices
@@ -32,15 +34,15 @@ namespace DataAccess.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public BaseResponsePagingViewModel<Transportation> GetAll(PagingRequest request)
+        public BaseResponsePagingViewModel<TransportationResponse> GetAll(PagingRequest request)
         {
             var transportation = _unitOfWork.Repository<Transportation>()
                                 .GetAll()
-                                /*.Include(d => d.DestinationImages)*/
-                                /*.ProjectTo<DestinationResponse>(_mapper.ConfigurationProvider)*/
+                                .Include(d => d.TourDetails)
+                                .ProjectTo<TransportationResponse>(_mapper.ConfigurationProvider)
                                 .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
 
-            return new BaseResponsePagingViewModel<Transportation>
+            return new BaseResponsePagingViewModel<TransportationResponse>
             {
                 Metadata = new PagingsMetadata()
                 {
@@ -52,7 +54,7 @@ namespace DataAccess.Services
             };
         }
 
-        public async Task<BaseResponseViewModel<Transportation>> Create(TransportationRequest request)
+        public async Task<BaseResponseViewModel<TransportationResponse>> Create(TransportationRequest request)
         {
             try
             {
@@ -68,7 +70,7 @@ namespace DataAccess.Services
                     throw new Exception(ex.Message);
                 }
 
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -76,12 +78,12 @@ namespace DataAccess.Services
                         Message = "Created",
                         IsSuccess = true
                     },
-                    Data = _mapper.Map<Transportation>(transportation)
+                    Data = _mapper.Map<TransportationResponse>(transportation)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -95,12 +97,12 @@ namespace DataAccess.Services
 
         }
 
-        public BaseResponseViewModel<Transportation> Get(int id)
+        public BaseResponseViewModel<TransportationResponse> Get(int id)
         {
             var transportation = GetById(id);
             if (transportation == null)
             {
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -111,7 +113,7 @@ namespace DataAccess.Services
                     Data = null
                 };
             }
-            return new BaseResponseViewModel<Transportation>
+            return new BaseResponseViewModel<TransportationResponse>
             {
                 Status = new StatusViewModel
                 {
@@ -119,7 +121,7 @@ namespace DataAccess.Services
                     Message = "OK",
                     IsSuccess = true
                 },
-                Data = _mapper.Map<Transportation>(transportation)
+                Data = _mapper.Map<TransportationResponse>(transportation)
             };
         }
 
@@ -130,13 +132,13 @@ namespace DataAccess.Services
             return result;
         }
 
-        public async Task<BaseResponseViewModel<Transportation>> Update(int id, TransportationUpdateRequest request)
+        public async Task<BaseResponseViewModel<TransportationResponse>> Update(int id, TransportationUpdateRequest request)
         {
             var transportation = GetById(id);
-            var transportationResponse = _mapper.Map<Transportation>(transportation);
+            var transportationResponse = _mapper.Map<TransportationResponse>(transportation);
             if (transportation == null)
             {
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -149,11 +151,11 @@ namespace DataAccess.Services
             }
             try
             {
-                var updateTransportation = _mapper.Map<TransportationUpdateRequest, Transportation>(request, transportationResponse);
-                await _unitOfWork.Repository<Transportation>().UpdateDetached(updateTransportation);
+                var updateTransportation = _mapper.Map<TransportationUpdateRequest, TransportationResponse>(request, transportationResponse);
+                await _unitOfWork.Repository<TransportationResponse>().UpdateDetached(updateTransportation);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -166,7 +168,7 @@ namespace DataAccess.Services
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -179,7 +181,7 @@ namespace DataAccess.Services
             }
         }
 
-        public async Task<BaseResponseViewModel<Transportation>> Create(TransportationCreateRequest request)
+        public async Task<BaseResponseViewModel<TransportationResponse>> Create(TransportationCreateRequest request)
         {
             try
             {
@@ -195,7 +197,7 @@ namespace DataAccess.Services
                     throw new Exception(ex.Message);
                 }
 
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -203,12 +205,12 @@ namespace DataAccess.Services
                         Message = "Created",
                         IsSuccess = true
                     },
-                    Data = _mapper.Map<Transportation>(transportation)
+                    Data = _mapper.Map<TransportationResponse>(transportation)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -221,12 +223,12 @@ namespace DataAccess.Services
             }
         }
 
-        public async Task<BaseResponseViewModel<Transportation>> Delete(int id)
+        public async Task<BaseResponseViewModel<TransportationResponse>> Delete(int id)
         {
             var transportation = GetById(id);
             if (transportation == null)
             {
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -248,7 +250,7 @@ namespace DataAccess.Services
                 _unitOfWork.Repository<Transportation>().Delete(transportation);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -261,7 +263,7 @@ namespace DataAccess.Services
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Transportation>
+                return new BaseResponseViewModel<TransportationResponse>
                 {
                     Status = new StatusViewModel
                     {

@@ -1,5 +1,6 @@
 ﻿using BusinessObject.Models;
 using DataAccess.DTO.Request;
+using DataAccess.DTO.Response;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ namespace TourBookingApi.Controllers
 
         // GET: api/Tours
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Transportation>>> GetTransportations([FromQuery] PagingRequest request)
+        public async Task<ActionResult<IEnumerable<TransportationResponse>>> GetTransportations([FromQuery] PagingRequest request)
         {
             var result = _transportationServices.GetAll(request);
             return Ok(result);
@@ -30,7 +31,7 @@ namespace TourBookingApi.Controllers
 
         // GET: api/Tours/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Transportation>> GetTransportation(int id)
+        public async Task<ActionResult<TransportationResponse>> GetTransportation(int id)
         {
             var result = _transportationServices.Get(id);
             return Ok(result);
@@ -52,7 +53,7 @@ namespace TourBookingApi.Controllers
         // POST: api/Tours
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Transportation>> PostTransportation(TransportationCreateRequest transportation)
+        public async Task<ActionResult<TransportationResponse>> PostTransportation(TransportationCreateRequest transportation)
         {
             var result = await _transportationServices.Create(transportation);
             if (result.Status.Code != HttpStatusCode.Created)

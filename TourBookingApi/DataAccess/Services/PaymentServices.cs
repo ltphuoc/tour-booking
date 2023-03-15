@@ -53,49 +53,6 @@ namespace DataAccess.Services
             };
         }
 
-        public async Task<BaseResponseViewModel<Payment>> Create(PaymentRequest request)
-        {
-            try
-            {
-                var payment = _mapper.Map<Payment>(request);
-
-                try
-                {
-                    await _unitOfWork.Repository<Payment>().InsertAsync(payment);
-                    await _unitOfWork.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
-
-                return new BaseResponseViewModel<Payment>
-                {
-                    Status = new StatusViewModel
-                    {
-                        Code = HttpStatusCode.Created,
-                        Message = "Created",
-                        IsSuccess = true
-                    },
-                    Data = _mapper.Map<Payment>(payment)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseViewModel<Payment>
-                {
-                    Status = new StatusViewModel
-                    {
-                        Code = HttpStatusCode.BadRequest,
-                        Message = "Bad Request",
-                        IsSuccess = false
-                    },
-                    Data = null
-                };
-            }
-
-        }
-
         public BaseResponseViewModel<Payment> Get(int id)
         {
             var payment = GetById(id);

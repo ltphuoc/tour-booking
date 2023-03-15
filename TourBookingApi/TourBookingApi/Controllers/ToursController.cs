@@ -9,6 +9,7 @@ using BusinessObject.Models;
 using DataAccess.Services;
 using DataAccess.DTO.Request;
 using System.Net;
+using DataAccess.DTO.Response;
 
 namespace TourBookingApi.Controllers
 {
@@ -27,7 +28,7 @@ namespace TourBookingApi.Controllers
 
         // GET: api/Tours
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tour>>> GetTours([FromQuery] PagingRequest request)
+        public async Task<ActionResult<IEnumerable<TourResponse>>> GetTours([FromQuery] PagingRequest request)
         {
             var result = _tourServices .GetAll(request);
             return Ok(result);
@@ -35,7 +36,7 @@ namespace TourBookingApi.Controllers
 
         // GET: api/Tours/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Tour>> GetTour(int id)
+        public async Task<ActionResult<TourResponse>> GetTour(int id)
         {
             var result = _tourServices.Get(id);
             return Ok(result);
@@ -57,7 +58,7 @@ namespace TourBookingApi.Controllers
         // POST: api/Tours
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Tour>> PostTour(TourCreateRequest tour)
+        public async Task<ActionResult<TourResponse>> PostTour(TourCreateRequest tour)
         {
             var result = await _tourServices.Create(tour);
             if (result.Status.Code != HttpStatusCode.Created)

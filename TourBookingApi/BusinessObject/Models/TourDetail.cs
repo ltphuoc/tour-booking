@@ -12,7 +12,7 @@ namespace BusinessObject.Models
         public string Departure { get; set; } = null!;
         public int DestinationId { get; set; }
         public DateTime ExpiredDate { get; set; }
-        public int TransportationId { get; set; }
+        public int? TransportationId { get; set; }
         public string TourDescription { get; set; } = null!;
 
         public virtual Destination Destination { get; set; } = null!;

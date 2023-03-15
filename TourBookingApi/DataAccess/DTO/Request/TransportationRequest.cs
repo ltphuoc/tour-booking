@@ -10,20 +10,20 @@ namespace DataAccess.DTO.Request
     {
         public string TransportationType { get; set; } = null!;
         public string TransportationDescription { get; set; } = null!;
-        public List<TourDetailRequest> TourDetail { get; set; }
+       /* public List<TourDetailRequest> TourDetail { get; set; }*/
     }
 
     public class TransportationUpdateRequest
     {
         public string TransportationType { get; set; } = null!;
         public string TransportationDescription { get; set; } = null!;
-        public List<TourDetailRequest> TourDetail { get; set; }
+        /*public List<TourDetailRequest> TourDetail { get; set; }*/
     }
 
     public class TransportationCreateRequest
     {
         public string TransportationType { get; set; } = null!;
         public string TransportationDescription { get; set; } = null!;
-        public List<TourDetailRequest> TourDetail { get; set; }
+        /*public List<TourDetailRequest> TourDetail { get; set; }*/
     }
 }
