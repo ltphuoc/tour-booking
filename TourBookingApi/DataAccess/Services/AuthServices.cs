@@ -8,7 +8,9 @@ using DataAccess.Common;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using FirebaseAdmin.Auth;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace DataAccess.Services
@@ -106,17 +108,16 @@ namespace DataAccess.Services
             };
         }
 
-        private Account GetByEmail(string email)
+        private async Task<Account> GetByEmail(string email)
         {
-            var account = _unitOfWork.Repository<Account>().GetWhere(x => x.Email.Equals(email)).Result.FirstOrDefault();
-            var result = _mapper.Map<Account>(account);
-            return result;
+            var account = await _unitOfWork.Repository<Account>().GetAll().Where(x => x.Email.Equals(email)).FirstOrDefaultAsync();
+            return account!;
         }
 
         public async Task<BaseResponseViewModel<JwtAuthResponse>> Login(LoginRequest request)
         {
-            var account = GetByEmail(request.Email);
-            if (account == null)
+            var account = GetByEmail(request.Email).Result;
+            if (account == null || account.Status != Constants.Status.INT_ACTIVE_STATUS)
             {
                 return new BaseResponseViewModel<JwtAuthResponse>
                 {
@@ -126,12 +127,6 @@ namespace DataAccess.Services
                         IsSuccess = false,
                         Code = HttpStatusCode.NotFound,
                     },
-                    Data = new JwtAuthResponse
-                    {
-                        UserName = request.Email,
-                        Token = null,
-                        ExpiresIn = 0
-                    }
                 };
             }
             else if (!account.Password.Equals(request.Password))
@@ -144,31 +139,27 @@ namespace DataAccess.Services
                         IsSuccess = false,
                         Code = HttpStatusCode.BadRequest,
                     },
-                    Data = new JwtAuthResponse
-                    {
-                        UserName = request.Email,
-                        Token = null,
-                        ExpiresIn = 0
-                    }
+                    Data = null,
                 };
             }
 
-            string role;
+            //string role;
 
-            if (account.Role == Common.Constants.Role.INT_ROLE_ADMIN)
-            {
-                role = Common.Constants.Role.STRING_ROLE_ADMIN;
-            }
-            else if (account.Role == Common.Constants.Role.INT_ROLE_USER)
-            {
-                role = Common.Constants.Role.STRING_ROLE_USER;
-            }
-            else
-            {
-                role = null;
-            }
+            //if (account.Role == Constants.Role.INT_ROLE_ADMIN)
+            //{
+            //    role = Constants.Role.STRING_ROLE_ADMIN;
+            //}
+            //else if (account.Role == Constants.Role.INT_ROLE_USER)
+            //{
+            //    role = Constants.Role.STRING_ROLE_USER;
+            //}
+            //else
+            //{
+            //    role = Constants.Role.STRING_ROLE_USER;
+            //}
+
             // generate token
-            var newToken = JwtAuthenticationManager.GenerateJwtToken(string.IsNullOrEmpty(account.Email) ? "" : account.Email, role!, account.Id, _configuration);
+            var newToken = JwtAuthenticationManager.GenerateJwtToken(account.Email, account.Role.ToString(), account.Id.ToString(), _configuration);
 
             return new BaseResponseViewModel<JwtAuthResponse>
             {
@@ -180,7 +171,6 @@ namespace DataAccess.Services
                 },
                 Data = new JwtAuthResponse
                 {
-
                     Token = newToken,
                     UserName = string.IsNullOrEmpty(account.Email) ? "" : account.Email,
                 }
@@ -189,38 +179,55 @@ namespace DataAccess.Services
 
         public async Task<BaseResponseViewModel<AccountResponse>> Register(RegisterRequest request)
         {
-            try
+            // Check if the request object is null or the email is empty
+            if (request == null || string.IsNullOrEmpty(request.Email))
             {
-                if (string.IsNullOrEmpty(request.Email))
-                {
-                    throw new Exception();
-                }
-
-                var account = _mapper.Map<Account>(request);
-
-                account.Status = Constants.Status.INT_ACTIVE_STATUS;
-                account.Role = Constants.Role.INT_ROLE_USER;
-
-                try
-                {
-                    await _unitOfWork.Repository<Account>().InsertAsync(account);
-                    await _unitOfWork.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
-
                 return new BaseResponseViewModel<AccountResponse>
                 {
                     Status = new StatusViewModel
                     {
-                        Code = HttpStatusCode.Created,
-                        Message = "Created",
-                        IsSuccess = true
-                    },
-                    Data = _mapper.Map<AccountResponse>(account)
+                        Code = HttpStatusCode.BadRequest,
+                        Message = "Bad Request: Request object cannot be null and email cannot be empty",
+                        IsSuccess = false
+                    }
+
                 };
+            }
+
+            // Check if the email is already taken
+            var check = await GetByEmail(request.Email);
+
+            if (check != null)
+            {
+                return new BaseResponseViewModel<AccountResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.BadRequest,
+                        Message = "Email already taken",
+                        IsSuccess = false
+                    },
+                    Data = null
+                };
+            }
+
+            var account = _mapper.Map<Account>(request);
+
+            // Check if the password is already encoded
+            if (!Utils.IsPasswordEncoded(account.Password))
+            {
+                // Encode the password
+                var hashedPassword = Utils.EncodePassword(account.Password);
+                account.Password = hashedPassword;
+            }
+
+            account.Status = Constants.Status.INT_ACTIVE_STATUS;
+            account.Role = Constants.Role.INT_ROLE_USER;
+
+            try
+            {
+                await _unitOfWork.Repository<Account>().InsertAsync(account);
+                await _unitOfWork.CommitAsync();
             }
             catch (Exception ex)
             {
@@ -229,18 +236,28 @@ namespace DataAccess.Services
                     Status = new StatusViewModel
                     {
                         Code = HttpStatusCode.BadRequest,
-                        Message = "Bad Request",
+                        Message = ex.Message,
                         IsSuccess = false
                     },
                     Data = null
                 };
             }
 
+            return new BaseResponseViewModel<AccountResponse>
+            {
+                Status = new StatusViewModel
+                {
+                    Code = HttpStatusCode.Created,
+                    Message = "Created",
+                    IsSuccess = true
+                },
+                Data = _mapper.Map<AccountResponse>(account)
+            };
         }
 
         public async Task<BaseResponseViewModel<AccountResponse>> ChangePassword(ChangePasswordRequest request)
         {
-            var account = GetByEmail(request.Email);
+            var account = GetByEmail(request.Email).Result;
             if (account == null)
             {
                 return new BaseResponseViewModel<AccountResponse>

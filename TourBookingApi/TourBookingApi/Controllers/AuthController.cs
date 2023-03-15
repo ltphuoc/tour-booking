@@ -1,8 +1,8 @@
-﻿using BusinessObject.Models;
+﻿using BusinessObjects.Services;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -14,12 +14,39 @@ namespace TourBookingApi.Controllers
     {
         private readonly IAuthServices _authServices;
         private readonly IAccountServices _accountServices;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IAuthServices loginServices, IAccountServices accountServices)
+        public AuthController(IAuthServices loginServices, IAccountServices accountServices, IConfiguration configuration)
         {
-
             _authServices = loginServices;
             _accountServices = accountServices;
+            _configuration = configuration;
+        }
+
+        [HttpPost("CheckToken")]
+        public IActionResult CheckToken()
+        {
+            try
+            {
+                // Get the JWT token from the Authorization header
+                string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                // Validate the JWT token
+                if (JwtAuthenticationManager.ValidateJwtToken(token, _configuration))
+                {
+                    // The token is valid and authorized for the "admin" role
+                    return Ok("You have access to this endpoint!");
+                }
+                else
+                {
+                    // The token is not valid or not authorized for the "admin" role
+                    return Forbid();
+                }
+            }
+            catch (Exception)
+            {
+                return Unauthorized();
+            }
         }
 
         [HttpPost("LoginWithGoogle")]
@@ -39,16 +66,11 @@ namespace TourBookingApi.Controllers
         [HttpPost("login")]
         public ActionResult Login([FromBody] LoginRequest loginRequest)
         {
-
             if (string.IsNullOrEmpty(loginRequest.Email.Trim()) || string.IsNullOrEmpty(loginRequest.Password.Trim()))
             {
                 return BadRequest("Email and password not allow null");
             }
-            //var authResult = _jwtAuthen.Authenticate(loginRequest);
-            //if (authResult.Code != "200")
-            //{
-            //    return BadRequest(authResult);
-            //}
+
             var result = _authServices.Login(loginRequest).Result;
             if (!result.Status.IsSuccess)
             {
@@ -68,6 +90,7 @@ namespace TourBookingApi.Controllers
             return Created("", response.Result);
         }
 
+        [Authorize(Policy = "UserOnly")]
         [HttpPut("change-password")]
         public IActionResult ChangePassword([FromBody] ChangePasswordRequest request)
         {

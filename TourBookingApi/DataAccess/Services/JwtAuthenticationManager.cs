@@ -7,107 +7,64 @@ using System.Text;
 
 namespace BusinessObjects.Services
 {
-    public class JwtAuthenticationManager
+    public interface IJwtAuthenticationManager
     {
-        private readonly IAccountServices _accountServices;
-
-        public JwtAuthenticationManager(IAccountServices accountServices)
+        bool ValidateJwtToken(string token, IConfiguration configuration);
+        string GenerateJwtToken(string username, string role, string userId, IConfiguration configuration);
+    }
+    public class JwtAuthenticationManager : IJwtAuthenticationManager
+    {
+        public JwtAuthenticationManager()
         {
-            _accountServices = accountServices;
         }
 
-        //public BaseResponseViewModel<JwtAuthResponse> Authenticate(LoginModel loginModel)
-        //{
-        //    try
-        //    {
-        //        //Validate for user name and password
-        //        var account = _accountServices.Get(x => x.Email.Equals(loginModel.Email)).FirstOrDefault();
-        //        if (account == null)
-        //        {
-        //            return new BaseResponse<JwtAuthResponse>
-        //            {
-        //                Code = "404",
-        //                Message = "Account not existed!",
-        //                Data = new JwtAuthResponse()
-        //                {
-        //                    Token = null,
-        //                    UserName = null
-        //                }
-        //            };
-        //        }
-        //        else if (!account.Password.Equals(loginModel.Password))
-        //        {
-        //            return new BaseResponse<JwtAuthResponse>
-        //            {
-        //                Code = "400",
-        //                Message = "Wrong password!",
-        //            };
-        //        }
-
-        //        var expiresTimeStamp = DateTime.Now.AddMinutes(Contants.JWT_TOKEN_VALIDITY_MINS);
-        //        var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-        //        var tokenKey = Encoding.ASCII.GetBytes(Contants.JWT_SECURITY_KEY);
-
-        //        var securityTokenDescriptor = new SecurityTokenDescriptor
-        //        {
-        //            Subject = new System.Security.Claims.ClaimsIdentity(new List<Claim>
-        //            {
-        //                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        //                new Claim(ClaimTypes.Name, loginModel.Email),
-        //                new Claim(ClaimTypes.NameIdentifier, loginModel.Password),
-        //            }),
-        //            Expires = expiresTimeStamp,
-        //            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature),
-        //        };
-
-        //        var securityToken = jwtSecurityTokenHandler.CreateToken(securityTokenDescriptor);
-        //        var token = jwtSecurityTokenHandler.WriteToken(securityToken);
-
-        //        return new BaseResponse<JwtAuthResponse>
-        //        {
-        //            Code = "200",
-        //            Message = "Login success!",
-        //            Data = new JwtAuthResponse()
-        //            {
-        //                Token = token,
-        //                UserName = loginModel.Email,
-        //                ExpiresIn = (int)expiresTimeStamp.Subtract(DateTime.Now).TotalSeconds
-        //            }
-        //        };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new BaseResponse<JwtAuthResponse>
-        //        {
-        //            Code = "400",
-        //            Message = "Something wrong || " + ex.Message,
-        //        };
-        //    }
-
-        //    //var responseAccount = _mapper.CreateMapper().Map<AccountViewModel>(account);
-        //}
-        public static string GenerateJwtToken(string username, string roles, int? userId, IConfiguration configuration)
+        public bool ValidateJwtToken(string token, IConfiguration configuration)
         {
-            var tokenConfig = configuration.GetSection("Token");
-            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(tokenConfig["SecretKey"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var permClaims = new List<Claim>()
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"]);
+            var validationParameters = new TokenValidationParameters
             {
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = configuration["Jwt:Audience"],
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
             };
-            if (roles != null)
-            {
-                permClaims.Add(new Claim(ClaimTypes.Role, roles));
-            }
 
-            var token = new JwtSecurityToken(tokenConfig["Issuer"],
-                tokenConfig["Issuer"],
-                permClaims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: credentials);
+            try
+            {
+                tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public string GenerateJwtToken(string username, string role, string userId, IConfiguration configuration)
+        {
+            //create claims details based on the user information
+            var claims = new[] {
+                        new Claim(JwtRegisteredClaimNames.Sub, configuration["Jwt:Subject"]),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                        new Claim("UserId", userId),
+                        new Claim("UserName", username),
+                        new Claim("Role", role)
+                    };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(
+                configuration["Jwt:Issuer"],
+                configuration["Jwt:Audience"],
+                claims,
+                expires: DateTime.UtcNow.AddMinutes(10),
+                signingCredentials: signIn);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }

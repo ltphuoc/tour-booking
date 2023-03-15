@@ -1,11 +1,11 @@
 using Autofac;
+using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
 using BusinessObject.MakeConnection;
-using BusinessObject.Repository;
-using BusinessObject.UnitOfWork;
 using DataAccess.Helpers;
-using DataAccess.Services;
 using Google.Apis.Auth.AspNetCore3;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using TourBookingApi.Mapper;
@@ -85,24 +85,49 @@ service.ConnectToConnectionString(builder.Configuration);
 
 #region JWT
 
-var appSettingsSection = builder.Configuration.GetSection("AppSettings");
+//var appSettingsSection = builder.Configuration.GetSection("AppSettings");
 
-service.Configure<AppSettings>(appSettingsSection);
-var appSettings = appSettingsSection.Get<AppSettings>();
+//service.Configure<AppSettings>(appSettingsSection);
+//var appSettings = appSettingsSection.Get<AppSettings>();
 
-var key = Encoding.ASCII.GetBytes(appSettings.Secret);
-service.AddAuthentication(x =>
-{
-    x.DefaultAuthenticateScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
-});
-var pathToKey = Path.Combine(Directory.GetCurrentDirectory(), "Keys", "firebase.json");
+//var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+
+//service.AddAuthentication(x =>
+//{
+//    x.DefaultAuthenticateScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
+//    x.DefaultChallengeScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
+//});
+//var pathToKey = Path.Combine(Directory.GetCurrentDirectory(), "Keys", "firebase.json");
 //FirebaseApp.Create(new AppOptions
 //{
 //    Credential = GoogleCredential.FromFile(pathToKey)
 //});
 
+service.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+
+service.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim("Role", "1"));
+    options.AddPolicy("UserOnly", policy =>
+        policy.RequireClaim("Role", "2"));
+});
+
 #endregion JWT
+
+//builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

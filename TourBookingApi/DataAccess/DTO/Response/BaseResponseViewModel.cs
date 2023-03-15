@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -15,8 +16,8 @@ namespace DataAccess.DTO.Response
 
     public class StatusViewModel
     {
-        public bool IsSuccess { get; set; }
-        public string Message { get; set; }
+        public bool IsSuccess { get; set; } = false;
+        public string Message { get; set; } = string.Empty;
         public HttpStatusCode Code { get; set; }
     }
 }
