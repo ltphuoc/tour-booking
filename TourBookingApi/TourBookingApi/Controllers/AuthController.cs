@@ -63,7 +63,7 @@ namespace TourBookingApi.Controllers
             }
         }
 
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public ActionResult Login([FromBody] LoginRequest loginRequest)
         {
             if (string.IsNullOrEmpty(loginRequest.Email.Trim()) || string.IsNullOrEmpty(loginRequest.Password.Trim()))
@@ -79,7 +79,7 @@ namespace TourBookingApi.Controllers
             return Ok(result);
         }
 
-        [HttpPost("register")]
+        [HttpPost("Register")]
         public async Task<ActionResult> Post([FromBody] RegisterRequest request)
         {
             var response = _authServices.Register(request);
@@ -91,7 +91,7 @@ namespace TourBookingApi.Controllers
         }
 
         [Authorize(Policy = "UserOnly")]
-        [HttpPut("change-password")]
+        [HttpPut("ChangePassword")]
         public IActionResult ChangePassword([FromBody] ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.NewPassword) || string.IsNullOrEmpty(request.Password))

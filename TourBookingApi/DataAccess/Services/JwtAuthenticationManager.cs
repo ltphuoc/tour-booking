@@ -7,18 +7,13 @@ using System.Text;
 
 namespace BusinessObjects.Services
 {
-    public interface IJwtAuthenticationManager
-    {
-        bool ValidateJwtToken(string token, IConfiguration configuration);
-        string GenerateJwtToken(string username, string role, string userId, IConfiguration configuration);
-    }
-    public class JwtAuthenticationManager : IJwtAuthenticationManager
+    public class JwtAuthenticationManager
     {
         public JwtAuthenticationManager()
         {
         }
 
-        public bool ValidateJwtToken(string token, IConfiguration configuration)
+        public static bool ValidateJwtToken(string token, IConfiguration configuration)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"]);
@@ -45,7 +40,7 @@ namespace BusinessObjects.Services
             }
         }
 
-        public string GenerateJwtToken(string username, string role, string userId, IConfiguration configuration)
+        public static string GenerateJwtToken(string username, string role, string userId, IConfiguration configuration)
         {
             //create claims details based on the user information
             var claims = new[] {
