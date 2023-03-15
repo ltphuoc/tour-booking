@@ -43,11 +43,18 @@ namespace TourBookingApi.Mapper
             CreateMap<TourPrice, TourPriceUpdateRequest>().ReverseMap();
             CreateMap<TourPrice, TourPriceCreateRequest>().ReverseMap();
 
+            CreateMap<Payment, PaymentRequest>().ReverseMap();
+            CreateMap<Payment, PaymentUpdateRequest>().ReverseMap();
+            CreateMap<Payment, PaymentCreateRequest>().ReverseMap();
+
+            CreateMap<Transportation, TransportationRequest>().ReverseMap();
+            CreateMap<Transportation, TransportationUpdateRequest>().ReverseMap();
+            CreateMap<Transportation, TransportationCreateRequest>().ReverseMap();
+
             CreateMap<DestinationImage, DestinationImageResponse>().ReverseMap();
             CreateMap<DestinationImage, DestinationImageRequest>().ReverseMap();
 
             CreateMap<TourDetail, TourDetailResponse>().ReverseMap();
         }
-
     }
 }

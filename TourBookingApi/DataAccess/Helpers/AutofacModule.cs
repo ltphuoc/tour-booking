@@ -32,6 +32,8 @@ namespace DataAccess.Helpers
             builder.RegisterType<TourDetailServices>().As<ITourDetailSevices>();
             builder.RegisterType<TourGuideServices>().As<ITourGuideSevices>();
             builder.RegisterType<TourPriceServices>().As<ITourPriceSevices>();
+            builder.RegisterType<PaymentServices>().As<IPaymentSevices>();
+            builder.RegisterType<TransportationServices>().As<ITransportationSevices>();
         }
     }
 }
