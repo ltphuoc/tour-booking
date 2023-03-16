@@ -33,7 +33,9 @@ namespace DataAccess.DTO.Request
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string Departure { get; set; } = null!;
-        public DateTime? ExpiredDate { get; set; } = null;
+        public int DestinationId { get; set; }
+        public DateTime ExpiredDate { get; set; }
+        public int? TransportationId { get; set; } = null!;
         public string TourDescription { get; set; } = null!;
     }
 }
