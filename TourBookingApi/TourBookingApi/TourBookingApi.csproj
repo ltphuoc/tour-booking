@@ -14,6 +14,7 @@
     <PackageReference Include="FirebaseAdmin" Version="2.3.0" />
     <PackageReference Include="Google.Apis.Auth.AspNetCore3" Version="1.60.0" />
     <PackageReference Include="Google.Apis.Oauth2.v2" Version="1.60.0.1869" />
+    <PackageReference Include="MailKit" Version="3.6.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.14" />
