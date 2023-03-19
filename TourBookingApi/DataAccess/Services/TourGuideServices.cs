@@ -15,8 +15,8 @@ namespace DataAccess.Services
 {
     public interface ITourGuideSevices
     {
-        BaseResponsePagingViewModel<TourGuide> GetAll(PagingRequest request);
-        BaseResponseViewModel<TourGuide> Get(int id);
+        BaseResponsePagingViewModel<TourGuideReponse> GetAll(PagingRequest request);
+        BaseResponseViewModel<TourGuideReponse> Get(int id);
         Task<BaseResponseViewModel<TourGuide>> Update(int id, TourGuideUpdateRequest request);
         Task<BaseResponseViewModel<TourGuide>> Create(TourGuideCreateRequest request);
         Task<BaseResponseViewModel<TourGuide>> Delete(int id);
@@ -32,15 +32,16 @@ namespace DataAccess.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public BaseResponsePagingViewModel<TourGuide> GetAll(PagingRequest request)
+        public BaseResponsePagingViewModel<TourGuideReponse> GetAll(PagingRequest request)
         {
             var tourguides = _unitOfWork.Repository<TourGuide>()
                                 .GetAll()
                                 /*.Include(d => d.DestinationImages)*/
                                 /*.ProjectTo<DestinationResponse>(_mapper.ConfigurationProvider)*/
                                 .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
+            var tourguideDTO = _mapper.Map<List<TourGuideReponse>>(tourguides.Item2.ToList());
 
-            return new BaseResponsePagingViewModel<TourGuide>
+            return new BaseResponsePagingViewModel<TourGuideReponse>
             {
                 Metadata = new PagingsMetadata()
                 {
@@ -48,16 +49,16 @@ namespace DataAccess.Services
                     Size = request.PageSize,
                     Total = tourguides.Item1
                 },
-                Data = tourguides.Item2.ToList(),
+                Data = tourguideDTO,
             };
         }
 
-        public BaseResponseViewModel<TourGuide> Get(int id)
+        public BaseResponseViewModel<TourGuideReponse> Get(int id)
         {
             var tourguide = GetById(id);
             if (tourguide == null)
             {
-                return new BaseResponseViewModel<TourGuide>
+                return new BaseResponseViewModel<TourGuideReponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -68,7 +69,7 @@ namespace DataAccess.Services
                     Data = null
                 };
             }
-            return new BaseResponseViewModel<TourGuide>
+            return new BaseResponseViewModel<TourGuideReponse>
             {
                 Status = new StatusViewModel
                 {
@@ -76,7 +77,7 @@ namespace DataAccess.Services
                     Message = "OK",
                     IsSuccess = true
                 },
-                Data = _mapper.Map<TourGuide>(tourguide)
+                Data = _mapper.Map<TourGuideReponse>(tourguide)
             };
         }
 
@@ -114,11 +115,11 @@ namespace DataAccess.Services
                 {
                     Status = new StatusViewModel
                     {
-                        Code = HttpStatusCode.OK,
+                        Code = HttpStatusCode.NoContent,
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = updateTourGuide
+                    Data = null
                 };
             }
             catch (Exception ex)

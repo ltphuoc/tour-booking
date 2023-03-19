@@ -43,11 +43,11 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> PutTransportation(int id, TransportationUpdateRequest transportation)
         {
             var result = _transportationServices.Update(id, transportation).Result;
-            if (result.Status.Code != HttpStatusCode.OK)
+            if (result.Status.Code != HttpStatusCode.NoContent)
             {
                 return BadRequest(result);
             }
-            return Ok(result);
+            return NoContent();
         }
 
         // POST: api/Tours

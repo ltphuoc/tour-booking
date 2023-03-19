@@ -15,7 +15,7 @@ namespace DataAccess.Services
 {
     public interface IBookingSevices
     {
-        BaseResponsePagingViewModel<Booking> GetAll(PagingRequest request);
+        BaseResponsePagingViewModel<BookingResponse> GetAll(PagingRequest request);
         BaseResponseViewModel<Booking> Get(int id);
         Task<BaseResponseViewModel<Booking>> Update(int id, BookingUpdateRequest request);
         Task<BaseResponseViewModel<Booking>> Create(BookingCreateRequest request);
@@ -32,7 +32,7 @@ namespace DataAccess.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public BaseResponsePagingViewModel<Booking> GetAll(PagingRequest request)
+        public BaseResponsePagingViewModel<BookingResponse> GetAll(PagingRequest request)
         {
             var bookings = _unitOfWork.Repository<Booking>()
                                 .GetAll()
@@ -40,7 +40,9 @@ namespace DataAccess.Services
                                 /*.ProjectTo<DestinationResponse>(_mapper.ConfigurationProvider)*/
                                 .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
 
-            return new BaseResponsePagingViewModel<Booking>
+            var bookingDTO = _mapper.Map<List<BookingResponse>>(bookings.Item2.ToList());
+
+            return new BaseResponsePagingViewModel<BookingResponse>
             {
                 Metadata = new PagingsMetadata()
                 {
@@ -48,7 +50,7 @@ namespace DataAccess.Services
                     Size = request.PageSize,
                     Total = bookings.Item1
                 },
-                Data = bookings.Item2.ToList(),
+                Data = bookingDTO,
             };
         }
 

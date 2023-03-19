@@ -19,7 +19,7 @@ namespace DataAccess.Services
     {
         BaseResponsePagingViewModel<TransportationResponse> GetAll(PagingRequest request);
         BaseResponseViewModel<TransportationResponse> Get(int id);
-        Task<BaseResponseViewModel<TransportationResponse>> Update(int id, TransportationUpdateRequest request);
+        Task<BaseResponseViewModel<Transportation>> Update(int id, TransportationUpdateRequest request);
         Task<BaseResponseViewModel<TransportationResponse>> Create(TransportationCreateRequest request);
         Task<BaseResponseViewModel<TransportationResponse>> Delete(int id);
 
@@ -132,13 +132,13 @@ namespace DataAccess.Services
             return result;
         }
 
-        public async Task<BaseResponseViewModel<TransportationResponse>> Update(int id, TransportationUpdateRequest request)
+        public async Task<BaseResponseViewModel<Transportation>> Update(int id, TransportationUpdateRequest request)
         {
             var transportation = GetById(id);
-            var transportationResponse = _mapper.Map<TransportationResponse>(transportation);
+            var transportationResponse = _mapper.Map<Transportation>(transportation);
             if (transportation == null)
             {
-                return new BaseResponseViewModel<TransportationResponse>
+                return new BaseResponseViewModel<Transportation>
                 {
                     Status = new StatusViewModel
                     {
@@ -151,24 +151,24 @@ namespace DataAccess.Services
             }
             try
             {
-                var updateTransportation = _mapper.Map<TransportationUpdateRequest, TransportationResponse>(request, transportationResponse);
-                await _unitOfWork.Repository<TransportationResponse>().UpdateDetached(updateTransportation);
+                var updateTransportation = _mapper.Map<TransportationUpdateRequest, Transportation>(request, transportationResponse);
+                await _unitOfWork.Repository<Transportation>().UpdateDetached(updateTransportation);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<TransportationResponse>
+                return new BaseResponseViewModel<Transportation>
                 {
                     Status = new StatusViewModel
                     {
-                        Code = HttpStatusCode.OK,
+                        Code = HttpStatusCode.NoContent,
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = updateTransportation
+                    Data = null
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<TransportationResponse>
+                return new BaseResponseViewModel<Transportation>
                 {
                     Status = new StatusViewModel
                     {

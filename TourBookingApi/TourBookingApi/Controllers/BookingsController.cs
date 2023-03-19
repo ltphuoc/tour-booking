@@ -9,6 +9,7 @@ using BusinessObject.Models;
 using DataAccess.Services;
 using DataAccess.DTO.Request;
 using System.Net;
+using DataAccess.DTO.Response;
 
 namespace TourBookingApi.Controllers
 {
@@ -27,7 +28,7 @@ namespace TourBookingApi.Controllers
 
         // GET: api/Bookings
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetBookings([FromQuery] PagingRequest request)
+        public async Task<ActionResult<IEnumerable<BookingResponse>>> GetBookings([FromQuery] PagingRequest request)
         {
             var result = _bookingServices.GetAll(request);
             return Ok(result);

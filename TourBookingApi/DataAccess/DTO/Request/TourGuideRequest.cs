@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace DataAccess.DTO.Request
         public int TourGuideAge { get; set; } = 0!;
         public string TourGuidePhone { get; set; } = null!;
         public string TourGuideEmail { get; set; } = null!;
-        public string TourGuideLanguage { get; set; } = null!;
+        public string TourGuideLanguageSpoken { get; set; } = null!;
         public string TourGuideAva { get; set; } = null!;
         public string TourGuideBio { get; set; } = null!;
 
@@ -25,11 +26,13 @@ namespace DataAccess.DTO.Request
         public int TourGuideAge { get; set; } = 0!;
         public string TourGuidePhone { get; set; } = null!;
         public string TourGuideEmail { get; set; } = null!;
-        public string TourGuideLanguage { get; set; } = null!;
+        public string TourGuideLanguageSpoken { get; set; } = null!;
         public string TourGuideAva { get; set; } = null!;
         public string TourGuideBio { get; set; } = null!;
 
-        public List<TourRequest> Tour { get; set; }
+        public int TourId { get; set; }
+
+       /* public List<TourRequest> Tour { get; set; }*/
     }
 
     public class TourGuideCreateRequest
@@ -38,10 +41,13 @@ namespace DataAccess.DTO.Request
         public int TourGuideAge { get; set; } = 0!;
         public string TourGuidePhone { get; set; } = null!;
         public string TourGuideEmail { get; set; } = null!;
-        public string TourGuideLanguage { get; set; } = null!;
+        public string TourGuideLanguageSpoken { get; set; } = null!;
         public string TourGuideAva { get; set; } = null!;
         public string TourGuideBio { get; set; } = null!;
 
-        public List<TourRequest> Tour { get; set; }
+        public int TourId { get; set; }
+
+       
+       /* public List<TourRequest>? Tour { get; set; }*/
     }
 }

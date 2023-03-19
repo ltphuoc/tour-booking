@@ -9,6 +9,7 @@ using BusinessObject.Models;
 using DataAccess.Services;
 using DataAccess.DTO.Request;
 using System.Net;
+using DataAccess.DTO.Response;
 
 namespace TourBookingApi.Controllers
 {
@@ -27,7 +28,7 @@ namespace TourBookingApi.Controllers
 
         // GET: api/TourGuides
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TourGuide>>> GetTourGuides([FromQuery] PagingRequest request)
+        public async Task<ActionResult<List<TourGuideReponse>>> GetTourGuides([FromQuery] PagingRequest request)
         {
             var result = _tourGuideServices.GetAll(request);
             return Ok(result);
@@ -35,7 +36,7 @@ namespace TourBookingApi.Controllers
 
         // GET: api/TourGuides/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TourGuide>> GetTourGuide(int id)
+        public async Task<ActionResult<TourGuideReponse>> GetTourGuide(int id)
         {
             var result = _tourGuideServices.Get(id);
             return Ok(result);
@@ -47,11 +48,11 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> PutTourGuide(int id, TourGuideUpdateRequest tourGuide)
         {
             var result = _tourGuideServices.Update(id, tourGuide).Result;
-            if (result.Status.Code != HttpStatusCode.OK)
+            if (result.Status.Code != HttpStatusCode.NoContent)
             {
                 return BadRequest(result);
             }
-            return Ok(result);
+            return NoContent();
         }
 
         // POST: api/TourGuides
