@@ -39,6 +39,8 @@ namespace DataAccess.Services
             var tours = _unitOfWork.Repository<Tour>()
                                 .GetAll()
                                 .Include(d => d.TourDetails)
+                                .Include(d => d.TourPrices)
+                                .Include(d => d.TourGuides)
                                 .ProjectTo<TourResponse>(_mapper.ConfigurationProvider)
                                 .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
 
