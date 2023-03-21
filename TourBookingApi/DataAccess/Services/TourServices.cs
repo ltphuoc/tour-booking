@@ -39,14 +39,18 @@ namespace DataAccess.Services
 
             var query = destinationId == 0 ? _unitOfWork.Repository<Tour>()
                                 .GetAll()
-                                .Include(d => d.TourDetails)
                                 .Include(d => d.TourPrices)
-                                .Include(d => d.TourGuides) : _unitOfWork.Repository<Tour>()
+                                .Include(d => d.TourGuides)
+                                .Include(d => d.TourDetails).ThenInclude(t => t.Destination).ThenInclude(t => t.DestinationImages)
+                                : _unitOfWork.Repository<Tour>()
                                 .GetAll()
-                                .Include(d => d.TourDetails)
+                                .Include(d => d.TourDetails).ThenInclude(t => t.Destination).ThenInclude(t => t.DestinationImages)
                                 .Include(d => d.TourPrices)
                                 .Include(d => d.TourGuides)
                                 .Where(d => d.TourDetails.FirstOrDefault()!.DestinationId == destinationId);
+
+            //var tours = query.Select(x => _mapper.Map<TourResponse>(x))
+            //    .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
 
             var tours = query
                                 .ProjectTo<TourResponse>(_mapper.ConfigurationProvider)

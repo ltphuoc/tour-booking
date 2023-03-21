@@ -18,6 +18,6 @@ namespace DataAccess.DTO.Response
         public DateTime ExpiredDate { get; set; }
         public string TourDescription { get; set; } = null!;
 
-        /*public List<DestinationResponse> Destination { get; set; }*/
+        public DestinationResponse Destination { get; set; }
     }
 }
