@@ -14,6 +14,6 @@ namespace DataAccess.DTO.Response
         public int TourDuration { get; set; }
         public int TourCapacity { get; set; }
         public int Status { get; set; }
-       /* public List<TourDetailResponse> TourDetails { get; set; }*/
+        public List<TourDetailResponse> TourDetails { get; set; }
     }
 }
