@@ -17,7 +17,7 @@ namespace DataAccess.DTO.Request
         public string TourGuideAva { get; set; } = null!;
         public string TourGuideBio { get; set; } = null!;
 
-        public List<TourRequest> Tour { get; set; }
+        //public List<TourRequest> Tour { get; set; }
     }
 
     public class TourGuideUpdateRequest

@@ -15,7 +15,7 @@ namespace DataAccess.DTO.Request
         public int NumAdults { get; set; } = 0!;
         public int NumInfants { get; set; } = 0!;
         public decimal[,] TotalPrice { get; set; } = new decimal[10, 2];
-        public List<PaymentRequest> Payments { get; set; }
+        //public List<PaymentRequest> Payments { get; set; }
     }
 
     public class BookingUpdateRequest
@@ -24,9 +24,9 @@ namespace DataAccess.DTO.Request
         public int NumAdults { get; set; } = 0!;
         public int NumInfants { get; set; } = 0!;
         public decimal[,] TotalPrice { get; set; } = new decimal[10, 2];
-        public TourRequest Tours { get; set; }
+        /*public TourRequest Tours { get; set; }
         public AccountRequest Customers { get; set; }
-        public List<PaymentRequest> Payments { get; set; }
+        public List<PaymentRequest> Payments { get; set; }*/
     }
 
     public class BookingCreateRequest
@@ -35,8 +35,8 @@ namespace DataAccess.DTO.Request
         public int NumAdults { get; set; } = 0!;
         public int NumInfants { get; set; } = 0!;
         public decimal[,] TotalPrice { get; set; } = new decimal[10, 2];
-        public TourRequest Tours { get; set; }
+        /*public TourRequest Tours { get; set; }
         public AccountRequest Customers { get; set; }
-        public List<PaymentRequest> Payments { get; set; }
+        public List<PaymentRequest> Payments { get; set; }*/
     }
 }

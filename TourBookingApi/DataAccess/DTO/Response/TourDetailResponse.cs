@@ -9,6 +9,7 @@ namespace DataAccess.DTO.Response
     public class TourDetailResponse
     {
         public int Id { get; set; }
+        public int TourId { get; set; }
         public int DestinationId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
