@@ -28,9 +28,9 @@ namespace TourBookingApi.Controllers
 
         // GET: api/Tours
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TourResponse>>> GetTours([FromQuery] PagingRequest request)
+        public async Task<ActionResult<IEnumerable<TourResponse>>> GetTours([FromQuery] PagingRequest request, [FromQuery] int destinationId)
         {
-            var result = _tourServices .GetAll(request);
+            var result = _tourServices.GetAll(request, destinationId);
             return Ok(result);
         }
 

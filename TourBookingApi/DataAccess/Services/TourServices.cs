@@ -17,7 +17,7 @@ namespace DataAccess.Services
 {
     public interface ITourSevices
     {
-        BaseResponsePagingViewModel<TourResponse> GetAll(PagingRequest request);
+        BaseResponsePagingViewModel<TourResponse> GetAll(PagingRequest request, int destinationId);
         BaseResponseViewModel<TourResponse> Get(int id);
         Task<BaseResponseViewModel<TourResponse>> Update(int id, TourUpdateRequest request);
         Task<BaseResponseViewModel<TourResponse>> Create(TourCreateRequest request);
@@ -34,13 +34,21 @@ namespace DataAccess.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public BaseResponsePagingViewModel<TourResponse> GetAll(PagingRequest request)
+        public BaseResponsePagingViewModel<TourResponse> GetAll(PagingRequest request, int destinationId)
         {
-            var tours = _unitOfWork.Repository<Tour>()
+
+            var query = destinationId == 0 ? _unitOfWork.Repository<Tour>()
+                                .GetAll()
+                                .Include(d => d.TourDetails)
+                                .Include(d => d.TourPrices)
+                                .Include(d => d.TourGuides) : _unitOfWork.Repository<Tour>()
                                 .GetAll()
                                 .Include(d => d.TourDetails)
                                 .Include(d => d.TourPrices)
                                 .Include(d => d.TourGuides)
+                                .Where(d => d.TourDetails.FirstOrDefault()!.DestinationId == destinationId);
+
+            var tours = query
                                 .ProjectTo<TourResponse>(_mapper.ConfigurationProvider)
                                 .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
 
