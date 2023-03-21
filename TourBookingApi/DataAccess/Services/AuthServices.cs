@@ -10,6 +10,7 @@ using DataAccess.DTO.Response;
 using FirebaseAdmin.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Utilities.Net;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 
@@ -53,10 +54,12 @@ namespace DataAccess.Services
                     FirstName = userRecord.DisplayName,
                     LastName = userRecord.DisplayName,
                     Email = userRecord.Email,
-                    Phone = userRecord.PhoneNumber,
-                    Avatar = userRecord.PhotoUrl
-
+                    Phone = userRecord.PhoneNumber ?? "",
+                    Avatar = userRecord.PhotoUrl,
+                    Address = "",
+                    Password = ""
                 };
+
                 accountDb = await _accountServices.Create(model);
             }
             else if (accountDb.Status.Code == HttpStatusCode.NotFound)
