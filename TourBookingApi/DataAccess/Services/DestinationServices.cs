@@ -8,6 +8,7 @@ using DataAccess.DTO.Response;
 using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
 using System.Net;
+using static DataAccess.Common.Constants;
 
 namespace DataAccess.Services
 {
@@ -32,7 +33,7 @@ namespace DataAccess.Services
         }
         public BaseResponsePagingViewModel<DestinationResponse> GetAll(PagingRequest request)
         {
-            var query = _unitOfWork.Repository<Destination>().GetAll().Include(d => d.DestinationImages);
+            var query = _unitOfWork.Repository<Destination>().GetAll().Include(d => d.DestinationImages).Where(d => d.Status == Status.INT_ACTIVE_STATUS);
 
             var destinations = query.Select(x => _mapper.Map<DestinationResponse>(x))
                 .PagingQueryable(request.Page, request.PageSize, Constants.LimitPaging, Constants.DefaultPaging);
@@ -128,6 +129,7 @@ namespace DataAccess.Services
             try
             {
                 var destination = _mapper.Map<Destination>(request);
+                destination.Status = Status.INT_ACTIVE_STATUS;
 
                 await _unitOfWork.Repository<Destination>().InsertAsync(destination);
                 await _unitOfWork.CommitAsync();
@@ -174,16 +176,17 @@ namespace DataAccess.Services
             }
             try
             {
-                var destinationImages = destination.DestinationImages.ToList();
-                foreach (var destinationImage in destinationImages)
-                {
-                    _unitOfWork.Repository<DestinationImage>().Delete(destinationImage);
-                }
-                var tourDetails = destination.TourDetails.ToList();
-                foreach (var tourDetail in tourDetails)
-                {
-                    _unitOfWork.Repository<TourDetail>().Delete(tourDetail);
-                }
+                //var destinationImages = destination.DestinationImages.ToList();
+                //foreach (var destinationImage in destinationImages)
+                //{
+                //    _unitOfWork.Repository<DestinationImage>().Delete(destinationImage);
+                //}
+                //var tourDetails = destination.TourDetails.ToList();
+                //foreach (var tourDetail in tourDetails)
+                //{
+                //    _unitOfWork.Repository<TourDetail>().Delete(tourDetail);
+                //}
+                destination.Status = Status.INT_DELETED_STATUS;
 
                 _unitOfWork.Repository<Destination>().Delete(destination);
                 await _unitOfWork.CommitAsync();
