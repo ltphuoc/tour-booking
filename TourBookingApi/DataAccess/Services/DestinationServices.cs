@@ -188,7 +188,7 @@ namespace DataAccess.Services
                 //}
                 destination.Status = Status.INT_DELETED_STATUS;
 
-                _unitOfWork.Repository<Destination>().Delete(destination);
+                await _unitOfWork.Repository<Destination>().UpdateDetached(destination);
                 await _unitOfWork.CommitAsync();
 
                 return new BaseResponseViewModel<DestinationResponse>

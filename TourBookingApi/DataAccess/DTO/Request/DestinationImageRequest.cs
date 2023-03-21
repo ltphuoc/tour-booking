@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BusinessObject.Models;
 
 namespace DataAccess.DTO.Request
 {
@@ -13,7 +9,13 @@ namespace DataAccess.DTO.Request
 
     public class DestinationImageUpdateRequest
     {
-        public int Id { get; set; }
         public string Image { get; set; } = null!;
+    }
+
+    public class DestinationImageCreateRequest
+    {
+        public string Image { get; set; } = null!;
+        public int DestinationId { get; set; }
+        //public virtual Destination Destination { get; set; } = null!;
     }
 }

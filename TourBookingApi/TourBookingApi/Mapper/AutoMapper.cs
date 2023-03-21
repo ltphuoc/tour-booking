@@ -25,6 +25,9 @@ namespace TourBookingApi.Mapper
 
             CreateMap<DestinationImage, DestinationImageResponse>().ReverseMap();
             CreateMap<DestinationImage, DestinationImageRequest>().ReverseMap();
+            CreateMap<DestinationImage, DestinationImageCreateRequest>().ReverseMap();
+            CreateMap<DestinationImage, DestinationImageUpdateRequest>().ReverseMap();
+
 
             CreateMap<Tour, TourRequest>().ReverseMap();
             CreateMap<Tour, TourResponse>().ReverseMap();
