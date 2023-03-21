@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
 using System.Net;
-using Constants = DataAccess.Common.Constants;
+using DataAccess.Common;
 
 namespace DataAccess.Services
 {
@@ -34,24 +34,47 @@ namespace DataAccess.Services
 
         public BaseResponsePagingViewModel<AccountResponse> GetAll(PagingRequest request)
         {
-            var accounts = _unitOfWork.Repository<Account>().GetAll().ProjectTo<AccountResponse>(_mapper.ConfigurationProvider)
-                .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging); ;
-            return new BaseResponsePagingViewModel<AccountResponse>
+            try
             {
-                Metadata = new PagingsMetadata()
+                var query = _unitOfWork.Repository<Account>().GetAll();
+                var accounts = query.Select(x => _mapper.Map<AccountResponse>(x))
+                    .PagingQueryable(request.Page, request.PageSize, Constants.LimitPaging, Constants.DefaultPaging);
+
+                return new BaseResponsePagingViewModel<AccountResponse>
                 {
-                    Page = request.Page,
-                    Size = request.PageSize,
-                    Total = accounts.Item1
-                },
-                Data = accounts.Item2.ToList(),
-            };
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.OK,
+                        Message = "OK",
+                        IsSuccess = true
+                    },
+                    Metadata = new PagingsMetadata()
+                    {
+                        Page = request.Page,
+                        Size = request.PageSize,
+                        Total = accounts.Item1
+                    },
+                    Data = accounts.Item2.ToList(),
+                };
+            }
+            catch
+            {
+                return new BaseResponsePagingViewModel<AccountResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.InternalServerError,
+                        Message = "Server Error",
+                        IsSuccess = true
+                    },
+                };
+            }
         }
 
         public BaseResponseViewModel<AccountResponse> Get(int id)
         {
-            var account = _unitOfWork.Repository<Account>().GetById(id);
-            if (account.Result == null)
+            var account = GetById(id);
+            if (account == null)
             {
                 return new BaseResponseViewModel<AccountResponse>
                 {
@@ -61,7 +84,6 @@ namespace DataAccess.Services
                         Message = "Not Found",
                         IsSuccess = false
                     },
-                    Data = null
                 };
             }
             return new BaseResponseViewModel<AccountResponse>
@@ -72,7 +94,7 @@ namespace DataAccess.Services
                     Message = "OK",
                     IsSuccess = true
                 },
-                Data = _mapper.Map<AccountResponse>(account.Result)
+                Data = _mapper.Map<AccountResponse>(account)
             };
         }
 
@@ -88,8 +110,7 @@ namespace DataAccess.Services
                         Code = HttpStatusCode.NotFound,
                         Message = "Not Found",
                         IsSuccess = false
-                    },
-                    Data = null
+                    }
                 };
             }
             try
@@ -109,7 +130,19 @@ namespace DataAccess.Services
                     Data = updateAccount
                 };
             }
-            catch (Exception ex)
+            catch (DbUpdateConcurrencyException)
+            {
+                return new BaseResponseViewModel<Account>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.Conflict,
+                        Message = "Conflict",
+                        IsSuccess = false
+                    }
+                };
+            }
+            catch (DbUpdateException)
             {
                 return new BaseResponseViewModel<Account>
                 {
@@ -118,10 +151,10 @@ namespace DataAccess.Services
                         Code = HttpStatusCode.BadRequest,
                         Message = "Bad Request",
                         IsSuccess = false
-                    },
-                    Data = null
+                    }
                 };
             }
+
         }
 
         public async Task<BaseResponseViewModel<AccountResponse>> Delete(int id)
@@ -134,15 +167,16 @@ namespace DataAccess.Services
                     Status = new StatusViewModel
                     {
                         Code = HttpStatusCode.NotFound,
-                        Message = "Not Found",
+                        Message = "Account Not Found",
                         IsSuccess = false
                     },
-                    Data = null
                 };
             }
+
+            account.Status = Constants.Status.INT_DELETED_STATUS;
+
             try
             {
-                account.Status = Constants.Status.INT_DELETED_STATUS;
                 await _unitOfWork.Repository<Account>().UpdateDetached(account);
                 await _unitOfWork.CommitAsync();
                 return new BaseResponseViewModel<AccountResponse>
@@ -153,46 +187,59 @@ namespace DataAccess.Services
                         Message = "OK",
                         IsSuccess = true
                     },
-                    Data = null
                 };
             }
-            catch (Exception ex)
+            catch (DbUpdateConcurrencyException)
+            {
+                return new BaseResponseViewModel<AccountResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.Conflict,
+                        Message = "Conflict",
+                        IsSuccess = false
+                    },
+                };
+            }
+            catch (DbUpdateException)
             {
                 return new BaseResponseViewModel<AccountResponse>
                 {
                     Status = new StatusViewModel
                     {
                         Code = HttpStatusCode.BadRequest,
-                        Message = "Bad Request\n " + ex.Message,
+                        Message = "Bad Request",
                         IsSuccess = false
                     },
-                    Data = null
                 };
             }
         }
+
         public async Task<BaseResponseViewModel<AccountResponse>> Create(AccountCreateRequest request)
         {
+            var accountExisted = GetByEmail(request.Email);
+
+            if (accountExisted != null)
+            {
+                return new BaseResponseViewModel<AccountResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.Conflict,
+                        Message = "An account with this email already exists.",
+                        IsSuccess = false
+                    }
+                };
+            }
+
+            var account = _mapper.Map<Account>(request);
+            account.Status = Constants.Status.INT_ACTIVE_STATUS;
+            account.Role = Constants.Role.INT_ROLE_USER;
+
             try
             {
-                if (string.IsNullOrEmpty(request.Email))
-                {
-                    throw new Exception();
-                }
-
-                var account = _mapper.Map<Account>(request);
-
-                account.Status = Constants.Status.INT_ACTIVE_STATUS;
-                account.Role = Constants.Role.INT_ROLE_USER;
-
-                try
-                {
-                    await _unitOfWork.Repository<Account>().InsertAsync(account);
-                    await _unitOfWork.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
+                await _unitOfWork.Repository<Account>().InsertAsync(account);
+                await _unitOfWork.CommitAsync();
 
                 return new BaseResponseViewModel<AccountResponse>
                 {
@@ -205,7 +252,7 @@ namespace DataAccess.Services
                     Data = _mapper.Map<AccountResponse>(account)
                 };
             }
-            catch (Exception ex)
+            catch
             {
                 return new BaseResponseViewModel<AccountResponse>
                 {
@@ -215,25 +262,21 @@ namespace DataAccess.Services
                         Message = "Bad Request",
                         IsSuccess = false
                     },
-                    Data = null
                 };
             }
 
         }
 
-
-        private Account GetByEmail(string email)
+        private Account? GetByEmail(string email)
         {
             var account = _unitOfWork.Repository<Account>().GetWhere(x => x.Email.Equals(email)).Result.FirstOrDefault();
-            var result = _mapper.Map<Account>(account);
-            return result;
+            return _mapper.Map<Account>(account);
         }
 
-        private Account GetById(int id)
+        private Account? GetById(int id)
         {
-            var account = _unitOfWork.Repository<Account>().GetById(id).Result;
-            var result = _mapper.Map<Account>(account);
-            return result;
+            var account = _unitOfWork.Repository<Account>().GetById(id)?.Result;
+            return _mapper.Map<Account>(account);
         }
 
     }

@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
 
 namespace DataAccess.DTO.Response
 {
     public class BaseResponsePagingViewModel<T>
     {
-        public PagingsMetadata Metadata { get; set; }
-        public List<T> Data { get; set; }
+        public StatusViewModel Status { get; set; } = new StatusViewModel();
+        public PagingsMetadata? Metadata { get; set; }
+        public List<T>? Data { get; set; }
     }
 
     public class PagingsMetadata

@@ -3,7 +3,6 @@ using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace TourBookingApi.Controllers
 {
@@ -11,12 +10,10 @@ namespace TourBookingApi.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        private readonly TourBookingContext _context;
         private readonly IAccountServices _accountServices;
 
-        public AccountsController(TourBookingContext context, IAccountServices accountServices)
+        public AccountsController(IAccountServices accountServices)
         {
-            _context = context;
             _accountServices = accountServices;
         }
 
@@ -25,7 +22,7 @@ namespace TourBookingApi.Controllers
         public ActionResult<IEnumerable<Account>> GetAccounts([FromQuery] PagingRequest request)
         {
             var result = _accountServices.GetAll(request);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // GET: api/Accounts/5
@@ -33,7 +30,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<Account>> GetAccount(int id)
         {
             var result = _accountServices.Get(id);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // PUT: api/Accounts/5
@@ -42,11 +39,7 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> PutAccount(int id, AccountUpdateResquest account)
         {
             var result = _accountServices.Update(id, account).Result;
-            if (result.Status.Code != HttpStatusCode.OK)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // POST: api/Accounts
@@ -55,11 +48,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<AccountResponse>> PostAccount(AccountCreateRequest account)
         {
             var result = await _accountServices.Create(account);
-            if (result.Status.Code != HttpStatusCode.Created)
-            {
-                return BadRequest(result);
-            }
-            return Created("", result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // DELETE: api/Accounts/5
@@ -67,15 +56,7 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> DeleteAccount(int id)
         {
             var result = _accountServices.Delete(id).Result;
-            if (result.Status.Code == HttpStatusCode.NotFound)
-            {
-                return NotFound(result);
-            }
-            else if (result.Status.Code == HttpStatusCode.BadRequest)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
     }
 }

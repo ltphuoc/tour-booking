@@ -10,4 +10,10 @@ namespace DataAccess.DTO.Request
     {
         public string Image { get; set; } = null!;
     }
+
+    public class DestinationImageUpdateRequest
+    {
+        public int Id { get; set; }
+        public string Image { get; set; } = null!;
+    }
 }

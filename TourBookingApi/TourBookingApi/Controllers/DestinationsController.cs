@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BusinessObject.Models;
-using DataAccess.DTO.Request;
+﻿using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
-using System.Net;
-using System.Security.Principal;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TourBookingApi.Controllers
 {
@@ -20,11 +11,9 @@ namespace TourBookingApi.Controllers
     {
 
         private readonly IDestinationServices _destinationServices;
-        private readonly TourBookingContext _context;
 
-        public DestinationsController(TourBookingContext context, IDestinationServices destinationServices)
+        public DestinationsController(IDestinationServices destinationServices)
         {
-            _context = context;
             _destinationServices = destinationServices;
         }
 
@@ -33,7 +22,7 @@ namespace TourBookingApi.Controllers
         public ActionResult<IEnumerable<DestinationResponse>> GetDestinations([FromQuery] PagingRequest request)
         {
             var result = _destinationServices.GetAll(request);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // GET: api/Destinations/5
@@ -41,7 +30,7 @@ namespace TourBookingApi.Controllers
         public ActionResult<DestinationResponse> GetDestination(int id)
         {
             var result = _destinationServices.Get(id);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // PUT: api/Destinations/5
@@ -50,11 +39,7 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> PutDestination(int id, DestinationUpdateRequest destination)
         {
             var result = _destinationServices.Update(id, destination).Result;
-            if (result.Status.Code != HttpStatusCode.OK)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // POST: api/Destinations
@@ -63,11 +48,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<DestinationResponse>> PostDestination(DestinationCreateRequest destination)
         {
             var result = await _destinationServices.Create(destination);
-            if (result.Status.Code != HttpStatusCode.Created)
-            {
-                return BadRequest(result);
-            }
-            return Created("", result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // DELETE: api/Destinations/5
@@ -75,15 +56,7 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> DeleteDestination(int id)
         {
             var result = _destinationServices.Delete(id).Result;
-            if (result.Status.Code == HttpStatusCode.NotFound)
-            {
-                return NotFound(result);
-            }
-            else if (result.Status.Code == HttpStatusCode.BadRequest)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
     }
 }

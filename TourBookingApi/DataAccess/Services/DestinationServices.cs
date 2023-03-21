@@ -2,16 +2,12 @@
 using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
+using DataAccess.Common;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.Services
 {
@@ -36,11 +32,10 @@ namespace DataAccess.Services
         }
         public BaseResponsePagingViewModel<DestinationResponse> GetAll(PagingRequest request)
         {
-            var destinations = _unitOfWork.Repository<Destination>()
-                                .GetAll()
-                                .Include(d => d.DestinationImages)
-                                .ProjectTo<DestinationResponse>(_mapper.ConfigurationProvider)
-                                .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
+            var query = _unitOfWork.Repository<Destination>().GetAll().Include(d => d.DestinationImages);
+
+            var destinations = query.Select(x => _mapper.Map<DestinationResponse>(x))
+                .PagingQueryable(request.Page, request.PageSize, Constants.LimitPaging, Constants.DefaultPaging);
 
             return new BaseResponsePagingViewModel<DestinationResponse>
             {
@@ -52,49 +47,6 @@ namespace DataAccess.Services
                 },
                 Data = destinations.Item2.ToList(),
             };
-        }
-
-        public async Task<BaseResponseViewModel<DestinationResponse>> Create(DestinationRequest request)
-        {
-            try
-            {
-                var destination = _mapper.Map<Destination>(request);
-
-                try
-                {
-                    await _unitOfWork.Repository<Destination>().InsertAsync(destination);
-                    await _unitOfWork.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
-
-                return new BaseResponseViewModel<DestinationResponse>
-                {
-                    Status = new StatusViewModel
-                    {
-                        Code = HttpStatusCode.Created,
-                        Message = "Created",
-                        IsSuccess = true
-                    },
-                    Data = _mapper.Map<DestinationResponse>(destination)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseViewModel<DestinationResponse>
-                {
-                    Status = new StatusViewModel
-                    {
-                        Code = HttpStatusCode.BadRequest,
-                        Message = "Bad Request",
-                        IsSuccess = false
-                    },
-                    Data = null
-                };
-            }
-
         }
 
         public BaseResponseViewModel<DestinationResponse> Get(int id)
@@ -110,7 +62,6 @@ namespace DataAccess.Services
                         Message = "Not Found",
                         IsSuccess = false
                     },
-                    Data = null
                 };
             }
             return new BaseResponseViewModel<DestinationResponse>
@@ -128,7 +79,7 @@ namespace DataAccess.Services
         public async Task<BaseResponseViewModel<DestinationResponse>> Update(int id, DestinationUpdateRequest request)
         {
             var destination = GetById(id);
-            var destinationResponse = _mapper.Map<DestinationResponse>(destination);
+
             if (destination == null)
             {
                 return new BaseResponseViewModel<DestinationResponse>
@@ -139,13 +90,12 @@ namespace DataAccess.Services
                         Message = "Not Found",
                         IsSuccess = false
                     },
-                    Data = null
                 };
             }
             try
             {
-                var updateDestination = _mapper.Map<DestinationUpdateRequest, DestinationResponse>(request, destinationResponse);
-                await _unitOfWork.Repository<DestinationResponse>().UpdateDetached(updateDestination);
+                var updateDestination = _mapper.Map<DestinationUpdateRequest, Destination>(request, destination);
+                await _unitOfWork.Repository<Destination>().UpdateDetached(updateDestination);
                 await _unitOfWork.CommitAsync();
 
                 return new BaseResponseViewModel<DestinationResponse>
@@ -156,7 +106,7 @@ namespace DataAccess.Services
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = updateDestination
+                    Data = _mapper.Map<DestinationResponse>(updateDestination)
                 };
             }
             catch (Exception ex)
@@ -169,7 +119,6 @@ namespace DataAccess.Services
                         Message = "Bad Request",
                         IsSuccess = false
                     },
-                    Data = null
                 };
             }
         }
@@ -180,15 +129,8 @@ namespace DataAccess.Services
             {
                 var destination = _mapper.Map<Destination>(request);
 
-                try
-                {
-                    await _unitOfWork.Repository<Destination>().InsertAsync(destination);
-                    await _unitOfWork.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
+                await _unitOfWork.Repository<Destination>().InsertAsync(destination);
+                await _unitOfWork.CommitAsync();
 
                 return new BaseResponseViewModel<DestinationResponse>
                 {
@@ -211,7 +153,6 @@ namespace DataAccess.Services
                         Message = "Bad Request",
                         IsSuccess = false
                     },
-                    Data = null
                 };
             }
         }
@@ -229,7 +170,6 @@ namespace DataAccess.Services
                         Message = "Not Found",
                         IsSuccess = false
                     },
-                    Data = null
                 };
             }
             try
@@ -256,7 +196,6 @@ namespace DataAccess.Services
                         Message = "OK",
                         IsSuccess = true
                     },
-                    Data = null
                 };
             }
             catch (Exception ex)
@@ -269,11 +208,9 @@ namespace DataAccess.Services
                         Message = "Bad Request\n " + ex.Message,
                         IsSuccess = false
                     },
-                    Data = null
                 };
             }
         }
-
 
         private Destination GetById(int id)
         {

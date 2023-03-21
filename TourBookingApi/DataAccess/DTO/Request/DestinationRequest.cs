@@ -23,7 +23,6 @@ namespace DataAccess.DTO.Request
         public string Region { get; set; } = null!;
         public string Description { get; set; } = null!;
         public int Status { get; set; }
-        public List<DestinationImageRequest> DestinationImages { get; set; }
     }
 
     public class DestinationCreateRequest
