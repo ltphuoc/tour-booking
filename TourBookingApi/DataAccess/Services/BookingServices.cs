@@ -91,7 +91,7 @@ namespace DataAccess.Services
                         Message = "Bad Request",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
 
@@ -110,7 +110,7 @@ namespace DataAccess.Services
                         Message = "Not Found",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
             return new BaseResponseViewModel<Booking>
@@ -146,7 +146,7 @@ namespace DataAccess.Services
                         Message = "Not Found",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
             try
@@ -176,7 +176,7 @@ namespace DataAccess.Services
                         Message = "Bad Request",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
         }
@@ -218,7 +218,7 @@ namespace DataAccess.Services
                         Message = "Bad Request",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
         }
@@ -236,7 +236,7 @@ namespace DataAccess.Services
                         Message = "Not Found",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
             try
@@ -268,7 +268,7 @@ namespace DataAccess.Services
                         Message = "OK",
                         IsSuccess = true
                     },
-                    Data = null
+                    Data = null!
                 };
             }
             catch (Exception ex)
@@ -281,7 +281,7 @@ namespace DataAccess.Services
                         Message = "Bad Request\n " + ex.Message,
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
         }

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
 using System;
 using System.Collections.Generic;
@@ -15,11 +17,11 @@ namespace DataAccess.Services
 {
     public interface ITourPriceSevices
     {
-        BaseResponsePagingViewModel<TourPrice> GetAll(PagingRequest request);
-        BaseResponseViewModel<TourPrice> Get(int id);
-        Task<BaseResponseViewModel<TourPrice>> Update(int id, TourPriceUpdateRequest request);
-        Task<BaseResponseViewModel<TourPrice>> Create(TourPriceCreateRequest request);
-        Task<BaseResponseViewModel<TourPrice>> Delete(int id);
+        BaseResponsePagingViewModel<TourPriceResponse> GetAll(PagingRequest request);
+        BaseResponseViewModel<TourPriceResponse> Get(int id);
+        Task<BaseResponseViewModel<TourPriceResponse>> Update(int id, TourPriceUpdateRequest request);
+        Task<BaseResponseViewModel<TourPriceResponse>> Create(TourPriceCreateRequest request);
+        Task<BaseResponseViewModel<TourPriceResponse>> Delete(int id);
 
     }
     public class TourPriceServices : ITourPriceSevices
@@ -32,15 +34,15 @@ namespace DataAccess.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public BaseResponsePagingViewModel<TourPrice> GetAll(PagingRequest request)
+        public BaseResponsePagingViewModel<TourPriceResponse> GetAll(PagingRequest request)
         {
             var tourPrices = _unitOfWork.Repository<TourPrice>()
                                 .GetAll()
-                                /*.Include(d => d.DestinationImages)*/
-                                /*.ProjectTo<DestinationResponse>(_mapper.ConfigurationProvider)*/
+                                .Include(d => d.Tour)
+                                .ProjectTo<TourPriceResponse>(_mapper.ConfigurationProvider)
                                 .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
 
-            return new BaseResponsePagingViewModel<TourPrice>
+            return new BaseResponsePagingViewModel<TourPriceResponse>
             {
                 Metadata = new PagingsMetadata()
                 {
@@ -52,12 +54,12 @@ namespace DataAccess.Services
             };
         }
 
-        public BaseResponseViewModel<TourPrice> Get(int id)
+        public BaseResponseViewModel<TourPriceResponse> Get(int id)
         {
             var tourPrice = GetById(id);
             if (tourPrice == null)
             {
-                return new BaseResponseViewModel<TourPrice>
+                return new BaseResponseViewModel<TourPriceResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -68,7 +70,7 @@ namespace DataAccess.Services
                     Data = null
                 };
             }
-            return new BaseResponseViewModel<TourPrice>
+            return new BaseResponseViewModel<TourPriceResponse>
             {
                 Status = new StatusViewModel
                 {
@@ -76,7 +78,7 @@ namespace DataAccess.Services
                     Message = "OK",
                     IsSuccess = true
                 },
-                Data = _mapper.Map<TourPrice>(tourPrice)
+                Data = _mapper.Map<TourPriceResponse>(tourPrice)
             };
         }
 
@@ -87,13 +89,13 @@ namespace DataAccess.Services
             return result;
         }
 
-        public async Task<BaseResponseViewModel<TourPrice>> Update(int id, TourPriceUpdateRequest request)
+        public async Task<BaseResponseViewModel<TourPriceResponse>> Update(int id, TourPriceUpdateRequest request)
         {
             var tourPrice = GetById(id);
-            var tourPriceResponse = _mapper.Map<TourPrice>(tourPrice);
+            //var tourPriceResponse = _mapper.Map<TourPrice>(tourPrice);
             if (tourPrice == null)
             {
-                return new BaseResponseViewModel<TourPrice>
+                return new BaseResponseViewModel<TourPriceResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -106,11 +108,11 @@ namespace DataAccess.Services
             }
             try
             {
-                var updateTourPrice = _mapper.Map<TourPriceUpdateRequest, TourPrice>(request, tourPriceResponse);
-                await _unitOfWork.Repository<TourPrice>().UpdateDetached(updateTourPrice);
+                var updateTourPrice = _mapper.Map<TourPriceUpdateRequest, TourPrice>(request, tourPrice);
+                await _unitOfWork.Repository<TourPrice>().UpdateDetached(tourPrice);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<TourPrice>
+                return new BaseResponseViewModel<TourPriceResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -118,12 +120,12 @@ namespace DataAccess.Services
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = updateTourPrice
+                    Data = _mapper.Map<TourPriceResponse>(updateTourPrice)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<TourPrice>
+                return new BaseResponseViewModel<TourPriceResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -136,7 +138,7 @@ namespace DataAccess.Services
             }
         }
 
-        public async Task<BaseResponseViewModel<TourPrice>> Create(TourPriceCreateRequest request)
+        public async Task<BaseResponseViewModel<TourPriceResponse>> Create(TourPriceCreateRequest request)
         {
             try
             {
@@ -152,7 +154,7 @@ namespace DataAccess.Services
                     throw new Exception(ex.Message);
                 }
 
-                return new BaseResponseViewModel<TourPrice>
+                return new BaseResponseViewModel<TourPriceResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -160,12 +162,12 @@ namespace DataAccess.Services
                         Message = "Created",
                         IsSuccess = true
                     },
-                    Data = _mapper.Map<TourPrice>(tourPrice)
+                    Data = _mapper.Map<TourPriceResponse>(tourPrice)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<TourPrice>
+                return new BaseResponseViewModel<TourPriceResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -178,12 +180,12 @@ namespace DataAccess.Services
             }
         }
 
-        public async Task<BaseResponseViewModel<TourPrice>> Delete(int id)
+        public async Task<BaseResponseViewModel<TourPriceResponse>> Delete(int id)
         {
             var tourPrice = GetById(id);
             if (tourPrice == null)
             {
-                return new BaseResponseViewModel<TourPrice>
+                return new BaseResponseViewModel<TourPriceResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -205,7 +207,7 @@ namespace DataAccess.Services
                 _unitOfWork.Repository<TourPrice>().Delete(tourPrice);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<TourPrice>
+                return new BaseResponseViewModel<TourPriceResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -218,7 +220,7 @@ namespace DataAccess.Services
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<TourPrice>
+                return new BaseResponseViewModel<TourPriceResponse>
                 {
                     Status = new StatusViewModel
                     {

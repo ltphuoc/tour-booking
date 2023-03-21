@@ -26,10 +26,6 @@ namespace DataAccess.DTO.Request
         public int TourDuration { get; set; } = 0!;
         public int TourCapacity { get; set; } = 0!;
         public int Status { get; set; }
-        public List<TourGuideRequest> TourGuides { get; set; }
-        public List<BookingRequest> Bookings { get; set; }
-        public List<TourDetailRequest> TourDetails { get; set; }
-        public List<TourPriceRequest> TourPrices { get; set; }
     }
 
     public class TourCreateRequest

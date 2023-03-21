@@ -136,7 +136,7 @@ namespace DataAccess.Services
         public async Task<BaseResponseViewModel<TourDetailResponse>> Update(int id, TourDetailUpdateRequest request)
         {
             var tourdetail = GetById(id);
-            var tourDetailResponse = _mapper.Map<TourDetailResponse>(tourdetail);
+            //var tourDetailResponse = _mapper.Map<TourDetailResponse>(tourdetail);
             if (tourdetail == null)
             {
                 return new BaseResponseViewModel<TourDetailResponse>
@@ -152,8 +152,8 @@ namespace DataAccess.Services
             }
             try
             {
-                var updateTourDetail = _mapper.Map<TourDetailUpdateRequest, TourDetailResponse>(request, tourDetailResponse);
-                await _unitOfWork.Repository<TourDetailResponse>().UpdateDetached(updateTourDetail);
+                var updateTourDetail = _mapper.Map<TourDetailUpdateRequest, TourDetail>(request, tourdetail);
+                await _unitOfWork.Repository<TourDetail>().UpdateDetached(tourdetail);
                 await _unitOfWork.CommitAsync();
 
                 return new BaseResponseViewModel<TourDetailResponse>
@@ -164,7 +164,7 @@ namespace DataAccess.Services
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = updateTourDetail
+                    Data = _mapper.Map<TourDetailResponse>(updateTourDetail)
                 };
             }
             catch (Exception ex)

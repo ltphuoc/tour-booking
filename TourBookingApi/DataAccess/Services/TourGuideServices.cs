@@ -17,9 +17,9 @@ namespace DataAccess.Services
     {
         BaseResponsePagingViewModel<TourGuideReponse> GetAll(PagingRequest request);
         BaseResponseViewModel<TourGuideReponse> Get(int id);
-        Task<BaseResponseViewModel<TourGuide>> Update(int id, TourGuideUpdateRequest request);
-        Task<BaseResponseViewModel<TourGuide>> Create(TourGuideCreateRequest request);
-        Task<BaseResponseViewModel<TourGuide>> Delete(int id);
+        Task<BaseResponseViewModel<TourGuideReponse>> Update(int id, TourGuideUpdateRequest request);
+        Task<BaseResponseViewModel<TourGuideReponse>> Create(TourGuideCreateRequest request);
+        Task<BaseResponseViewModel<TourGuideReponse>> Delete(int id);
 
     }
     public class TourGuideServices : ITourGuideSevices
@@ -88,13 +88,13 @@ namespace DataAccess.Services
             return result;
         }
 
-        public async Task<BaseResponseViewModel<TourGuide>> Update(int id, TourGuideUpdateRequest request)
+        public async Task<BaseResponseViewModel<TourGuideReponse>> Update(int id, TourGuideUpdateRequest request)
         {
             var tourGuide = GetById(id);
-            var tourGuideResponse = _mapper.Map<TourGuide>(tourGuide);
+            //var tourGuideResponse = _mapper.Map<TourGuide>(tourGuide);
             if (tourGuide == null)
             {
-                return new BaseResponseViewModel<TourGuide>
+                return new BaseResponseViewModel<TourGuideReponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -107,11 +107,11 @@ namespace DataAccess.Services
             }
             try
             {
-                var updateTourGuide = _mapper.Map<TourGuideUpdateRequest, TourGuide>(request, tourGuideResponse);
+                var updateTourGuide = _mapper.Map<TourGuideUpdateRequest, TourGuide>(request, tourGuide);
                 await _unitOfWork.Repository<TourGuide>().UpdateDetached(updateTourGuide);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<TourGuide>
+                return new BaseResponseViewModel<TourGuideReponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -119,12 +119,12 @@ namespace DataAccess.Services
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = null
+                    Data = _mapper.Map<TourGuideReponse>(updateTourGuide)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<TourGuide>
+                return new BaseResponseViewModel<TourGuideReponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -137,7 +137,7 @@ namespace DataAccess.Services
             }
         }
 
-        public async Task<BaseResponseViewModel<TourGuide>> Create(TourGuideCreateRequest request)
+        public async Task<BaseResponseViewModel<TourGuideReponse>> Create(TourGuideCreateRequest request)
         {
             try
             {
@@ -153,7 +153,7 @@ namespace DataAccess.Services
                     throw new Exception(ex.Message);
                 }
 
-                return new BaseResponseViewModel<TourGuide>
+                return new BaseResponseViewModel<TourGuideReponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -161,12 +161,12 @@ namespace DataAccess.Services
                         Message = "Created",
                         IsSuccess = true
                     },
-                    Data = _mapper.Map<TourGuide>(tourGuide)
+                    Data = _mapper.Map<TourGuideReponse>(tourGuide)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<TourGuide>
+                return new BaseResponseViewModel<TourGuideReponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -179,12 +179,12 @@ namespace DataAccess.Services
             }
         }
 
-        public async Task<BaseResponseViewModel<TourGuide>> Delete(int id)
+        public async Task<BaseResponseViewModel<TourGuideReponse>> Delete(int id)
         {
             var tourGuide = GetById(id);
             if (tourGuide == null)
             {
-                return new BaseResponseViewModel<TourGuide>
+                return new BaseResponseViewModel<TourGuideReponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -206,7 +206,7 @@ namespace DataAccess.Services
                 _unitOfWork.Repository<TourGuide>().Delete(tourGuide);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<TourGuide>
+                return new BaseResponseViewModel<TourGuideReponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -219,7 +219,7 @@ namespace DataAccess.Services
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<TourGuide>
+                return new BaseResponseViewModel<TourGuideReponse>
                 {
                     Status = new StatusViewModel
                     {

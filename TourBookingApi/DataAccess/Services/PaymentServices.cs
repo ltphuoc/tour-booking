@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
 using System;
 using System.Collections.Generic;
@@ -15,11 +17,11 @@ namespace DataAccess.Services
 {
     public interface IPaymentSevices
     {
-        BaseResponsePagingViewModel<Payment> GetAll(PagingRequest request);
-        BaseResponseViewModel<Payment> Get(int id);
-        Task<BaseResponseViewModel<Payment>> Update(int id, PaymentUpdateRequest request);
-        Task<BaseResponseViewModel<Payment>> Create(PaymentCreateRequest request);
-        Task<BaseResponseViewModel<Payment>> Delete(int id);
+        BaseResponsePagingViewModel<PaymentResponse> GetAll(PagingRequest request);
+        BaseResponseViewModel<PaymentResponse> Get(int id);
+        Task<BaseResponseViewModel<PaymentResponse>> Update(int id, PaymentUpdateRequest request);
+        Task<BaseResponseViewModel<PaymentResponse>> Create(PaymentCreateRequest request);
+        Task<BaseResponseViewModel<PaymentResponse>> Delete(int id);
 
     }
 
@@ -33,15 +35,16 @@ namespace DataAccess.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public BaseResponsePagingViewModel<Payment> GetAll(PagingRequest request)
+        public BaseResponsePagingViewModel<PaymentResponse> GetAll(PagingRequest request)
         {
             var payments = _unitOfWork.Repository<Payment>()
                                 .GetAll()
-                                /*.Include(d => d.DestinationImages)*/
-                                /*.ProjectTo<DestinationResponse>(_mapper.ConfigurationProvider)*/
+                                .Include(d => d.Booking)
+                                .ProjectTo<PaymentResponse>(_mapper.ConfigurationProvider)
                                 .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
+            
 
-            return new BaseResponsePagingViewModel<Payment>
+            return new BaseResponsePagingViewModel<PaymentResponse>
             {
                 Metadata = new PagingsMetadata()
                 {
@@ -53,12 +56,12 @@ namespace DataAccess.Services
             };
         }
 
-        public BaseResponseViewModel<Payment> Get(int id)
+        public BaseResponseViewModel<PaymentResponse> Get(int id)
         {
             var payment = GetById(id);
             if (payment == null)
             {
-                return new BaseResponseViewModel<Payment>
+                return new BaseResponseViewModel<PaymentResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -66,10 +69,10 @@ namespace DataAccess.Services
                         Message = "Not Found",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
-            return new BaseResponseViewModel<Payment>
+            return new BaseResponseViewModel<PaymentResponse>
             {
                 Status = new StatusViewModel
                 {
@@ -77,7 +80,7 @@ namespace DataAccess.Services
                     Message = "OK",
                     IsSuccess = true
                 },
-                Data = _mapper.Map<Payment>(payment)
+                Data = _mapper.Map<PaymentResponse>(payment)
             };
         }
 
@@ -88,13 +91,13 @@ namespace DataAccess.Services
             return result;
         }
 
-        public async Task<BaseResponseViewModel<Payment>> Update(int id, PaymentUpdateRequest request)
+        public async Task<BaseResponseViewModel<PaymentResponse>> Update(int id, PaymentUpdateRequest request)
         {
             var payment = GetById(id);
-            var paymentResponse = _mapper.Map<Payment>(payment);
+            //var paymentResponse = _mapper.Map<Payment>(payment);
             if (payment == null)
             {
-                return new BaseResponseViewModel<Payment>
+                return new BaseResponseViewModel<PaymentResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -102,16 +105,16 @@ namespace DataAccess.Services
                         Message = "Not Found",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
             try
             {
-                var updatePayment = _mapper.Map<PaymentUpdateRequest, Payment>(request, paymentResponse);
+                var updatePayment = _mapper.Map<PaymentUpdateRequest, Payment>(request, payment);
                 await _unitOfWork.Repository<Payment>().UpdateDetached(updatePayment);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<Payment>
+                return new BaseResponseViewModel<PaymentResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -119,12 +122,12 @@ namespace DataAccess.Services
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = updatePayment
+                    Data = _mapper.Map<PaymentResponse>(updatePayment)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Payment>
+                return new BaseResponseViewModel<PaymentResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -132,12 +135,12 @@ namespace DataAccess.Services
                         Message = "Bad Request",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
         }
 
-        public async Task<BaseResponseViewModel<Payment>> Create(PaymentCreateRequest request)
+        public async Task<BaseResponseViewModel<PaymentResponse>> Create(PaymentCreateRequest request)
         {
             try
             {
@@ -153,7 +156,7 @@ namespace DataAccess.Services
                     throw new Exception(ex.Message);
                 }
 
-                return new BaseResponseViewModel<Payment>
+                return new BaseResponseViewModel<PaymentResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -161,12 +164,12 @@ namespace DataAccess.Services
                         Message = "Created",
                         IsSuccess = true
                     },
-                    Data = _mapper.Map<Payment>(payment)
+                    Data = _mapper.Map<PaymentResponse>(payment)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Payment>
+                return new BaseResponseViewModel<PaymentResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -174,17 +177,17 @@ namespace DataAccess.Services
                         Message = "Bad Request",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
         }
 
-        public async Task<BaseResponseViewModel<Payment>> Delete(int id)
+        public async Task<BaseResponseViewModel<PaymentResponse>> Delete(int id)
         {
             var payment = GetById(id);
             if (payment == null)
             {
-                return new BaseResponseViewModel<Payment>
+                return new BaseResponseViewModel<PaymentResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -192,7 +195,7 @@ namespace DataAccess.Services
                         Message = "Not Found",
                         IsSuccess = false
                     },
-                    Data = null
+                    Data = null!
                 };
             }
             try
@@ -206,7 +209,7 @@ namespace DataAccess.Services
                 _unitOfWork.Repository<Payment>().Delete(payment);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<Payment>
+                return new BaseResponseViewModel<PaymentResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -219,7 +222,7 @@ namespace DataAccess.Services
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Payment>
+                return new BaseResponseViewModel<PaymentResponse>
                 {
                     Status = new StatusViewModel
                     {
