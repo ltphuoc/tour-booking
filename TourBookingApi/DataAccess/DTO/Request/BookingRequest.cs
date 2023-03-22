@@ -11,19 +11,22 @@ namespace DataAccess.DTO.Request
 
         public int TourId { get; set; }
         public int CustomerId { get; set; }
-        public DateTime BookingDate { get; set; } = new DateTime();
-        public int NumAdults { get; set; } = 0!;
-        public int NumInfants { get; set; } = 0!;
-        public decimal[,] TotalPrice { get; set; } = new decimal[10, 2];
+        public DateTime BookingDate { get; set; }
+        public int NumAdults { get; set; }
+        public int NumChildren { get; set; }
+        public int NumInfants { get; set; }
         //public List<PaymentRequest> Payments { get; set; }
     }
 
     public class BookingUpdateRequest
     {
-        public DateTime BookingDate { get; set; } = new DateTime();
-        public int NumAdults { get; set; } = 0!;
-        public int NumInfants { get; set; } = 0!;
-        public decimal[,] TotalPrice { get; set; } = new decimal[10, 2];
+        public int TourId { get; set; }
+        public int CustomerId { get; set; }
+        public DateTime BookingDate { get; set; }
+        public int NumAdults { get; set; }
+        public int NumChildren { get; set; }
+        public int NumInfants { get; set; }
+        /*public decimal TotalPrice { get; set; }*/
         /*public TourRequest Tours { get; set; }
         public AccountRequest Customers { get; set; }
         public List<PaymentRequest> Payments { get; set; }*/
@@ -31,10 +34,13 @@ namespace DataAccess.DTO.Request
 
     public class BookingCreateRequest
     {
-        public DateTime BookingDate { get; set; } = new DateTime();
-        public int NumAdults { get; set; } = 0!;
-        public int NumInfants { get; set; } = 0!;
-        public decimal[,] TotalPrice { get; set; } = new decimal[10, 2];
+        public int TourId { get; set; }
+        public int CustomerId { get; set; }
+        public DateTime BookingDate { get; set; }
+        public int NumAdults { get; set; }
+        public int NumChildren { get; set; }
+        public int NumInfants { get; set; }
+        /*public decimal TotalPrice { get; set; }*/
         /*public TourRequest Tours { get; set; }
         public AccountRequest Customers { get; set; }
         public List<PaymentRequest> Payments { get; set; }*/

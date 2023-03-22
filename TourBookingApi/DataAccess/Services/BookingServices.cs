@@ -16,10 +16,10 @@ namespace DataAccess.Services
     public interface IBookingSevices
     {
         BaseResponsePagingViewModel<BookingResponse> GetAll(PagingRequest request);
-        BaseResponseViewModel<Booking> Get(int id);
-        Task<BaseResponseViewModel<Booking>> Update(int id, BookingUpdateRequest request);
-        Task<BaseResponseViewModel<Booking>> Create(BookingCreateRequest request);
-        Task<BaseResponseViewModel<Booking>> Delete(int id);
+        BaseResponseViewModel<BookingResponse> Get(int id);
+        Task<BaseResponseViewModel<BookingResponse>> Update(int id, BookingUpdateRequest request);
+        Task<BaseResponseViewModel<BookingResponse>> Create(BookingCreateRequest request);
+        Task<BaseResponseViewModel<BookingResponse>> Delete(int id);
 
     }
     public class BookingServices : IBookingSevices
@@ -97,12 +97,12 @@ namespace DataAccess.Services
 
         }
 
-        public BaseResponseViewModel<Booking> Get(int id)
+        public BaseResponseViewModel<BookingResponse> Get(int id)
         {
             var booking = GetById(id);
             if (booking == null)
             {
-                return new BaseResponseViewModel<Booking>
+                return new BaseResponseViewModel<BookingResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -113,7 +113,7 @@ namespace DataAccess.Services
                     Data = null!
                 };
             }
-            return new BaseResponseViewModel<Booking>
+            return new BaseResponseViewModel<BookingResponse>
             {
                 Status = new StatusViewModel
                 {
@@ -121,7 +121,7 @@ namespace DataAccess.Services
                     Message = "OK",
                     IsSuccess = true
                 },
-                Data = _mapper.Map<Booking>(booking)
+                Data = _mapper.Map<BookingResponse>(booking)
             };
         }
 
@@ -132,13 +132,13 @@ namespace DataAccess.Services
             return result;
         }
 
-        public async Task<BaseResponseViewModel<Booking>> Update(int id, BookingUpdateRequest request)
+        public async Task<BaseResponseViewModel<BookingResponse>> Update(int id, BookingUpdateRequest request)
         {
             var booking = GetById(id);
-            var bookingResponse = _mapper.Map<Booking>(booking);
+            //var bookingResponse = _mapper.Map<Booking>(booking);
             if (booking == null)
             {
-                return new BaseResponseViewModel<Booking>
+                return new BaseResponseViewModel<BookingResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -151,11 +151,11 @@ namespace DataAccess.Services
             }
             try
             {
-                var updateBooking = _mapper.Map<BookingUpdateRequest, Booking>(request, bookingResponse);
+                var updateBooking = _mapper.Map<BookingUpdateRequest, Booking>(request, booking);
                 await _unitOfWork.Repository<Booking>().UpdateDetached(updateBooking);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<Booking>
+                return new BaseResponseViewModel<BookingResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -163,12 +163,12 @@ namespace DataAccess.Services
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = updateBooking
+                    Data = _mapper.Map<BookingResponse>(updateBooking)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Booking>
+                return new BaseResponseViewModel<BookingResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -181,7 +181,7 @@ namespace DataAccess.Services
             }
         }
 
-        public async Task<BaseResponseViewModel<Booking>> Create(BookingCreateRequest request)
+        public async Task<BaseResponseViewModel<BookingResponse>> Create(BookingCreateRequest request)
         {
             try
             {
@@ -197,7 +197,7 @@ namespace DataAccess.Services
                     throw new Exception(ex.Message);
                 }
 
-                return new BaseResponseViewModel<Booking>
+                return new BaseResponseViewModel<BookingResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -205,12 +205,12 @@ namespace DataAccess.Services
                         Message = "Created",
                         IsSuccess = true
                     },
-                    Data = _mapper.Map<Booking>(booking)
+                    Data = _mapper.Map<BookingResponse>(booking)
                 };
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Booking>
+                return new BaseResponseViewModel<BookingResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -223,12 +223,12 @@ namespace DataAccess.Services
             }
         }
 
-        public async Task<BaseResponseViewModel<Booking>> Delete(int id)
+        public async Task<BaseResponseViewModel<BookingResponse>> Delete(int id)
         {
             var booking = GetById(id);
             if (booking == null)
             {
-                return new BaseResponseViewModel<Booking>
+                return new BaseResponseViewModel<BookingResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -260,7 +260,7 @@ namespace DataAccess.Services
                 _unitOfWork.Repository<Booking>().Delete(booking);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<Booking>
+                return new BaseResponseViewModel<BookingResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -273,7 +273,7 @@ namespace DataAccess.Services
             }
             catch (Exception ex)
             {
-                return new BaseResponseViewModel<Booking>
+                return new BaseResponseViewModel<BookingResponse>
                 {
                     Status = new StatusViewModel
                     {
