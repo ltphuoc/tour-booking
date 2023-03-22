@@ -19,9 +19,11 @@ namespace DataAccess.DTO.Response
         public int NumInfants { get; set; }
         public decimal TotalPrice { get; set; }
 
-        /*public TourRequest Tours { get; set; }
-        public AccountRequest Customers { get; set; }
 
-        public List<PaymentRequest> Payments { get; set; }*/
+
+        public TourResponse Tour { get; set; }
+        public AccountResponse Customer { get; set; }
+
+        public List<PaymentResponse> Payments { get; set; }
     }
 }

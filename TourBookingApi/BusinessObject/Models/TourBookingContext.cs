@@ -197,6 +197,12 @@ namespace BusinessObject.Models
                     .IsUnicode(false)
                     .HasColumnName("payment_method");
 
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.PaymentCode).HasColumnName("payment_code");
+
+                entity.Property(e => e.PaymentImage).HasColumnName("payment_image");
+
                 entity.HasOne(d => d.Booking)
                     .WithMany(p => p.Payments)
                     .HasForeignKey(d => d.BookingId)

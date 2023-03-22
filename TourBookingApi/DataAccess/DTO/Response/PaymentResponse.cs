@@ -14,5 +14,8 @@ namespace DataAccess.DTO.Response
         public DateTime PaymentDate { get; set; }
         public decimal PaymentAmount { get; set; }
 
+        public string PaymentCode { get; set; }
+        public string PaymentImage { get; set; }
+
     }
 }

@@ -14,7 +14,7 @@ namespace DataAccess.DTO.Request
 
     public class DestinationImageCreateRequest
     {
-        public string Image { get; set; } = null!;
+        public List<string> Image { get; set; } = null!;
         public int DestinationId { get; set; }
         //public virtual Destination Destination { get; set; } = null!;
     }

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
 using System;
 using System.Collections.Generic;
@@ -36,11 +38,12 @@ namespace DataAccess.Services
         {
             var bookings = _unitOfWork.Repository<Booking>()
                                 .GetAll()
-                                /*.Include(d => d.DestinationImages)*/
-                                /*.ProjectTo<DestinationResponse>(_mapper.ConfigurationProvider)*/
+                                .Include(d => d.Customer)
+                                .Include(d => d.Tour)
+                                .ProjectTo<BookingResponse>(_mapper.ConfigurationProvider)
                                 .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
 
-            var bookingDTO = _mapper.Map<List<BookingResponse>>(bookings.Item2.ToList());
+            //var bookingDTO = _mapper.Map<List<BookingResponse>>(bookings.Item2.ToList());
 
             return new BaseResponsePagingViewModel<BookingResponse>
             {
@@ -50,7 +53,7 @@ namespace DataAccess.Services
                     Size = request.PageSize,
                     Total = bookings.Item1
                 },
-                Data = bookingDTO,
+                Data = bookings.Item2.ToList(),
             };
         }
 
@@ -186,7 +189,6 @@ namespace DataAccess.Services
             try
             {
                 var booking = _mapper.Map<Booking>(request);
-
                 try
                 {
                     await _unitOfWork.Repository<Booking>().InsertAsync(booking);

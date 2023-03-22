@@ -34,10 +34,16 @@ namespace DataAccess.Services
         {
             try
             {
-                var destination = _mapper.Map<DestinationImage>(request);
+                foreach (var item in request.Image)
+                {
+                    var destination = new DestinationImage();
+                    destination.DestinationId = request.DestinationId;
+                    destination.Image = item;
+                    await _unitOfWork.Repository<DestinationImage>().InsertAsync(destination);
+                    await _unitOfWork.CommitAsync();
+                }
 
-                await _unitOfWork.Repository<DestinationImage>().InsertAsync(destination);
-                await _unitOfWork.CommitAsync();
+                //var destinations = _unitOfWork.Repository<Destination>().GetById(request.DestinationId);
 
                 return new BaseResponseViewModel<DestinationImageResponse>
                 {
@@ -47,7 +53,7 @@ namespace DataAccess.Services
                         Message = "Created",
                         IsSuccess = true
                     },
-                    Data = _mapper.Map<DestinationImageResponse>(destination)
+                    //Data = _mapper.Map<DestinationImageResponse>(destinations)
                 };
             }
             catch (Exception ex)

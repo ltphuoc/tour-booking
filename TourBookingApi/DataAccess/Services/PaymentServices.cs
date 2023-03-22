@@ -19,7 +19,9 @@ namespace DataAccess.Services
     {
         BaseResponsePagingViewModel<PaymentResponse> GetAll(PagingRequest request);
         BaseResponseViewModel<PaymentResponse> Get(int id);
-        Task<BaseResponseViewModel<PaymentResponse>> Update(int id, PaymentUpdateRequest request);
+        Task<BaseResponseViewModel<PaymentResponse>> UpdateImage(int id, string image);
+        Task<BaseResponseViewModel<PaymentResponse>> UpdateStatus(int id, int status);
+
         Task<BaseResponseViewModel<PaymentResponse>> Create(PaymentCreateRequest request);
         Task<BaseResponseViewModel<PaymentResponse>> Delete(int id);
 
@@ -42,7 +44,6 @@ namespace DataAccess.Services
                                 .Include(d => d.Booking)
                                 .ProjectTo<PaymentResponse>(_mapper.ConfigurationProvider)
                                 .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
-            
 
             return new BaseResponsePagingViewModel<PaymentResponse>
             {
@@ -68,8 +69,7 @@ namespace DataAccess.Services
                         Code = HttpStatusCode.NotFound,
                         Message = "Not Found",
                         IsSuccess = false
-                    },
-                    Data = null!
+                    }
                 };
             }
             return new BaseResponseViewModel<PaymentResponse>
@@ -91,10 +91,10 @@ namespace DataAccess.Services
             return result;
         }
 
-        public async Task<BaseResponseViewModel<PaymentResponse>> Update(int id, PaymentUpdateRequest request)
+        public async Task<BaseResponseViewModel<PaymentResponse>> UpdateImage(int id, string image)
         {
             var payment = GetById(id);
-            //var paymentResponse = _mapper.Map<Payment>(payment);
+
             if (payment == null)
             {
                 return new BaseResponseViewModel<PaymentResponse>
@@ -110,8 +110,9 @@ namespace DataAccess.Services
             }
             try
             {
-                var updatePayment = _mapper.Map<PaymentUpdateRequest, Payment>(request, payment);
-                await _unitOfWork.Repository<Payment>().UpdateDetached(updatePayment);
+                //var updatePayment = _mapper.Map<PaymentUpdateRequest, Payment>(request, payment);
+                payment.PaymentImage = image;
+                await _unitOfWork.Repository<Payment>().UpdateDetached(payment);
                 await _unitOfWork.CommitAsync();
 
                 return new BaseResponseViewModel<PaymentResponse>
@@ -122,7 +123,57 @@ namespace DataAccess.Services
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = _mapper.Map<PaymentResponse>(updatePayment)
+                    Data = _mapper.Map<PaymentResponse>(payment)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseViewModel<PaymentResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.BadRequest,
+                        Message = "Bad Request",
+                        IsSuccess = false
+                    },
+                    Data = null!
+                };
+            }
+        }
+
+        public async Task<BaseResponseViewModel<PaymentResponse>> UpdateStatus(int id, int status)
+        {
+            var payment = GetById(id);
+
+            if (payment == null)
+            {
+                return new BaseResponseViewModel<PaymentResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.NotFound,
+                        Message = "Not Found",
+                        IsSuccess = false
+                    },
+                    Data = null!
+                };
+            }
+            try
+            {
+                //var updatePayment = _mapper.Map<PaymentUpdateRequest, Payment>(request, payment);
+                payment.Status = status;
+                await _unitOfWork.Repository<Payment>().UpdateDetached(payment);
+                await _unitOfWork.CommitAsync();
+
+                return new BaseResponseViewModel<PaymentResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.OK,
+                        Message = "Updated",
+                        IsSuccess = true
+                    },
+                    Data = _mapper.Map<PaymentResponse>(payment)
                 };
             }
             catch (Exception ex)
