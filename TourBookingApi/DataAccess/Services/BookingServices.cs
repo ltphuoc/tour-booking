@@ -6,12 +6,8 @@ using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using static DataAccess.Helpers.Enum;
 
 namespace DataAccess.Services
 {
@@ -197,7 +193,7 @@ namespace DataAccess.Services
                     PaymentCreateRequest paymentRequest = new PaymentCreateRequest();
                     paymentRequest.BookingId = booking.Id;
                     paymentRequest.PaymentDate = booking.BookingDate;
-                    paymentRequest.Status = 3;
+                    paymentRequest.Status = (int?)PaymentStatusEnum.Waiting;
                     paymentRequest.PaymentCode = "";
                     paymentRequest.PaymentAmount = booking.TotalPrice;
                     paymentRequest.PaymentMethod = request.PaymentMethod;
