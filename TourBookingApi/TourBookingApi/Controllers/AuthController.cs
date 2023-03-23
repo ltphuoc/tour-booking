@@ -71,7 +71,18 @@ namespace TourBookingApi.Controllers
                 return BadRequest("Email and password not allow null");
             }
 
-            var result = _authServices.Login(loginRequest).Result;
+            var result = _authServices.Login(loginRequest);
+            if (!result.Status.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        [HttpPost("admin/Login")]
+        public ActionResult LoginAdmin([FromBody] LoginAdminRequest loginRequest)
+        {
+            var result = _authServices.LoginAdmin(loginRequest);
             if (!result.Status.IsSuccess)
             {
                 return BadRequest(result);

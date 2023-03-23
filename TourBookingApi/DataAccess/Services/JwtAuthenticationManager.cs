@@ -62,5 +62,29 @@ namespace BusinessObjects.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public static string GetUserIdFromJwtToken(string token, IConfiguration configuration)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"]);
+
+            tokenHandler.ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = configuration["Jwt:Audience"],
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            }, out SecurityToken validatedToken);
+
+            var jwtToken = (JwtSecurityToken)validatedToken;
+
+            var userId = jwtToken.Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
+
+            return userId;
+        }
     }
 }

@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BusinessObject.Models;
-using DataAccess.Services;
+﻿using BusinessObject.Models;
+using BusinessObjects.Services;
 using DataAccess.DTO.Request;
-using System.Net;
 using DataAccess.DTO.Response;
+using DataAccess.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace TourBookingApi.Controllers
 {
@@ -19,11 +15,13 @@ namespace TourBookingApi.Controllers
     {
         private readonly IBookingSevices _bookingServices;
         private readonly TourBookingContext _context;
+        private readonly IConfiguration _configuration;
 
-        public BookingsController(TourBookingContext context, IBookingSevices bookingServices)
+        public BookingsController(TourBookingContext context, IBookingSevices bookingServices, IConfiguration configuration)
         {
             _context = context;
             _bookingServices = bookingServices;
+            _configuration = configuration;
         }
 
         // GET: api/Bookings
@@ -58,8 +56,13 @@ namespace TourBookingApi.Controllers
         // POST: api/Bookings
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Booking>> PostBooking(BookingCreateRequest booking)
         {
+            string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var customerId = JwtAuthenticationManager.GetUserIdFromJwtToken(token, _configuration);
+            booking.CustomerId = int.Parse(customerId);
+
             var result = await _bookingServices.Create(booking);
             if (result.Status.Code != HttpStatusCode.Created)
             {

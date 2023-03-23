@@ -61,6 +61,13 @@ namespace DataAccess.DTO.Request
         public string Password { get; set; } = null!;
     }
 
+    public class LoginAdminRequest
+    {
+        [Required]
+        public string UserName { get; set; } = null!;
+        [Required]
+        public string Password { get; set; } = null!;
+    }
     public class ChangePasswordRequest
     {
         public string Email { get; set; } = null!;

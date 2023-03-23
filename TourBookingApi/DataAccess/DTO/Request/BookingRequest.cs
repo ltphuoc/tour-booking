@@ -36,7 +36,7 @@ namespace DataAccess.DTO.Request
     public class BookingCreateRequest
     {
         public int TourId { get; set; }
-        public int CustomerId { get; set; }
+        public int? CustomerId { get; set; }
         public DateTime BookingDate { get; set; }
         public int NumAdults { get; set; }
         public int NumChildren { get; set; }

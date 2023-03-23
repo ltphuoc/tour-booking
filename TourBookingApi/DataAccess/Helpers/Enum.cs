@@ -17,7 +17,7 @@ namespace DataAccess.Helpers
         }
         public enum PaymentTypeEnum
         {
-            Cod = 2, Momo = 1,
+            Cod = 1, Bank = 2,
         }
     }
 }

@@ -3,15 +3,12 @@ using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using BusinessObjects.ResponseModels.Authentication;
 using BusinessObjects.Services;
-using Castle.Core.Internal;
 using DataAccess.Common;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using FirebaseAdmin.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Org.BouncyCastle.Utilities.Net;
-using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace DataAccess.Services
@@ -19,7 +16,8 @@ namespace DataAccess.Services
     public interface IAuthServices
     {
         Task<BaseResponseViewModel<JwtAuthResponse>> LoginWithGoogle(ExternalAuthRequest data);
-        Task<BaseResponseViewModel<JwtAuthResponse>> Login(LoginRequest request);
+        BaseResponseViewModel<JwtAuthResponse> Login(LoginRequest request);
+        BaseResponseViewModel<JwtAuthResponse> LoginAdmin(LoginAdminRequest request);
         Task<BaseResponseViewModel<AccountResponse>> Register(RegisterRequest request);
         Task<BaseResponseViewModel<AccountResponse>> ChangePassword(ChangePasswordRequest request);
     }
@@ -45,7 +43,7 @@ namespace DataAccess.Services
             FirebaseToken decodeToken = await auth.VerifyIdTokenAsync(data.IdToken);
             UserRecord userRecord = await auth.GetUserAsync(decodeToken.Uid);
 
-            var accountDb = await GetAccountByEmail(userRecord.Email);
+            var accountDb = GetAccountByEmail(userRecord.Email);
 
             if (accountDb.Data == null)
             {
@@ -95,7 +93,7 @@ namespace DataAccess.Services
             };
         }
 
-        public async Task<BaseResponseViewModel<AccountResponse>> GetAccountByEmail(string email)
+        public BaseResponseViewModel<AccountResponse> GetAccountByEmail(string email)
         {
             Account? account;
             account = _unitOfWork.Repository<Account>()
@@ -134,7 +132,7 @@ namespace DataAccess.Services
             return account!;
         }
 
-        public async Task<BaseResponseViewModel<JwtAuthResponse>> Login(LoginRequest request)
+        public BaseResponseViewModel<JwtAuthResponse> Login(LoginRequest request)
         {
             var account = GetByEmail(request.Email).Result;
             if (account == null || account.Status != Constants.Status.INT_ACTIVE_STATUS)
@@ -159,24 +157,8 @@ namespace DataAccess.Services
                         IsSuccess = false,
                         Code = HttpStatusCode.BadRequest,
                     },
-                    Data = null,
                 };
             }
-
-            //string role;
-
-            //if (account.Role == Constants.Role.INT_ROLE_ADMIN)
-            //{
-            //    role = Constants.Role.STRING_ROLE_ADMIN;
-            //}
-            //else if (account.Role == Constants.Role.INT_ROLE_USER)
-            //{
-            //    role = Constants.Role.STRING_ROLE_USER;
-            //}
-            //else
-            //{
-            //    role = Constants.Role.STRING_ROLE_USER;
-            //}
 
             // generate token
             var newToken = JwtAuthenticationManager.GenerateJwtToken(account.Email, account.Role.ToString(), account.Id.ToString(), _configuration);
@@ -319,6 +301,41 @@ namespace DataAccess.Services
                     Code = HttpStatusCode.OK,
                 },
                 Data = null,
+            };
+        }
+
+        public BaseResponseViewModel<JwtAuthResponse> LoginAdmin(LoginAdminRequest request)
+        {
+            var username = _configuration["Admin:UserName"];
+            var password = _configuration["Admin:Password"];
+            if (request.UserName != username || request.Password != password)
+            {
+                return new BaseResponseViewModel<JwtAuthResponse>
+                {
+                    Status = new StatusViewModel()
+                    {
+                        Message = "Username or password not correct!",
+                        IsSuccess = false,
+                        Code = HttpStatusCode.NotFound,
+                    },
+                };
+            }
+            // generate token
+            var newToken = JwtAuthenticationManager.GenerateJwtToken(username, Constants.Role.INT_ROLE_ADMIN.ToString(), username, _configuration);
+
+            return new BaseResponseViewModel<JwtAuthResponse>
+            {
+                Status = new StatusViewModel()
+                {
+                    Message = "Login success",
+                    IsSuccess = true,
+                    Code = HttpStatusCode.OK,
+                },
+                Data = new JwtAuthResponse
+                {
+                    Token = newToken,
+                    UserName = username,
+                }
             };
         }
     }
