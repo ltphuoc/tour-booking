@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BusinessObject.Models;
-using DataAccess.Services;
+﻿using BusinessObject.Models;
 using DataAccess.DTO.Request;
-using System.Net;
 using DataAccess.DTO.Response;
+using DataAccess.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace TourBookingApi.Controllers
 {

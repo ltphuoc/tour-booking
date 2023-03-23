@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Net;
-
-namespace DataAccess.DTO.Response
+﻿namespace DataAccess.DTO.Response
 {
     public class BaseResponsePagingViewModel<T>
     {

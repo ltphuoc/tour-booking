@@ -6,10 +6,8 @@ using DataAccess.Services;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Text;
 using TourBookingApi.Mapper;
 
@@ -28,7 +26,6 @@ builder.Host.ConfigureContainer<ContainerBuilder>(x => x.RegisterModule(new Auto
 // Add services to the container
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -122,8 +119,6 @@ service.AddAuthorization(options =>
 });
 
 #endregion JWT
-
-//builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

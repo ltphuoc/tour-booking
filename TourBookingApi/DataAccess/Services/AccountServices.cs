@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
+using DataAccess.Common;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
 using System.Net;
-using DataAccess.Common;
 
 namespace DataAccess.Services
 {

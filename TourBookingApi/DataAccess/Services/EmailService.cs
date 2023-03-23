@@ -1,14 +1,10 @@
 ﻿
 using DataAccess.DTO.Request;
-
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.Extensions.Configuration;
 using MimeKit;
 using MimeKit.Text;
-
-
-
-using Microsoft.Extensions.Configuration;
 
 namespace DataAccess.Services
 {
