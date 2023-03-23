@@ -43,6 +43,7 @@ namespace DataAccess.DTO.Request
         public int NumInfants { get; set; }
         public decimal TotalPrice { get; set; }
 
+        public string PaymentMethod { get; set; }
         //public virtual Tour Tour { get; set; } = null!;
         //public virtual Account Customer { get; set; } = null!;
 
