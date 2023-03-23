@@ -200,7 +200,7 @@ namespace DataAccess.Services
                     paymentRequest.BookingId = booking.Id;
                     paymentRequest.PaymentDate = booking.BookingDate;
                     paymentRequest.Status = 3;
-                    paymentRequest.PaymentCode = booking.Tour.TourName + booking.Tour.TourDuration.ToString();
+                    paymentRequest.PaymentCode = "";
                     paymentRequest.PaymentAmount = booking.TotalPrice;
                     paymentRequest.PaymentMethod = "1";
 
