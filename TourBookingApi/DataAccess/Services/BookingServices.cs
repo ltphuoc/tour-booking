@@ -194,20 +194,18 @@ namespace DataAccess.Services
                     await _unitOfWork.Repository<Booking>().InsertAsync(booking);
                     await _unitOfWork.CommitAsync();
 
-                    //var book = 
-
                     PaymentCreateRequest paymentRequest = new PaymentCreateRequest();
                     paymentRequest.BookingId = booking.Id;
                     paymentRequest.PaymentDate = booking.BookingDate;
                     paymentRequest.Status = 3;
                     paymentRequest.PaymentCode = "";
                     paymentRequest.PaymentAmount = booking.TotalPrice;
-                    paymentRequest.PaymentMethod = "1";
+                    paymentRequest.PaymentMethod = request.PaymentMethod;
 
                     var payment = _mapper.Map<Payment>(paymentRequest);
 
                     await _unitOfWork.Repository<Payment>().InsertAsync(payment);
-                        await _unitOfWork.CommitAsync();
+                    await _unitOfWork.CommitAsync();
 
                 }
                 catch (Exception ex)
