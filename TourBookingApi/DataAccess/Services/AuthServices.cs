@@ -19,7 +19,7 @@ namespace DataAccess.Services
         BaseResponseViewModel<JwtAuthResponse> Login(LoginRequest request);
         BaseResponseViewModel<JwtAuthResponse> LoginAdmin(LoginAdminRequest request);
         Task<BaseResponseViewModel<AccountResponse>> Register(RegisterRequest request);
-        Task<BaseResponseViewModel<AccountResponse>> ChangePassword(ChangePasswordRequest request);
+        Task<BaseResponseViewModel<AccountResponse>> ChangePassword(ChangePasswordRequest request, int accountId);
     }
 
     public class AuthServices : IAuthServices
@@ -257,9 +257,10 @@ namespace DataAccess.Services
             };
         }
 
-        public async Task<BaseResponseViewModel<AccountResponse>> ChangePassword(ChangePasswordRequest request)
+        public async Task<BaseResponseViewModel<AccountResponse>> ChangePassword(ChangePasswordRequest request, int accountId)
         {
-            var account = GetByEmail(request.Email).Result;
+            //var account = GetByEmail(request.Email).Result;
+            var account = _unitOfWork.Repository<Account>().GetById(accountId)?.Result;
             if (account == null)
             {
                 return new BaseResponseViewModel<AccountResponse>

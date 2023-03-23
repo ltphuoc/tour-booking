@@ -1,10 +1,7 @@
 ﻿using BusinessObject.Models;
 using DataAccess.DTO.Request;
 using DataAccess.Services;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace TourBookingApi.Controllers
 {
@@ -14,11 +11,9 @@ namespace TourBookingApi.Controllers
     {
 
         private readonly IPaymentSevices _paymentServices;
-        private readonly TourBookingContext _context;
 
-        public PaymentsController(TourBookingContext context, IPaymentSevices paymentServices)
+        public PaymentsController(IPaymentSevices paymentServices)
         {
-            _context = context;
             _paymentServices = paymentServices;
         }
 
@@ -27,7 +22,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<IEnumerable<Payment>>> GetPayments([FromQuery] PagingRequest request)
         {
             var result = _paymentServices.GetAll(request);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // GET: api/Tours/5
@@ -35,7 +30,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<Payment>> GetPayment(int id)
         {
             var result = _paymentServices.Get(id);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // PUT: api/Tours/5
@@ -44,22 +39,14 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> PutPayment(int id, [FromBody] string image)
         {
             var result = _paymentServices.UpdateImage(id, image).Result;
-            if (result.Status.Code != HttpStatusCode.OK)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         [HttpPut("{id}/update-status/{status}")]
         public async Task<IActionResult> PutPaymentStatus(int id, int status)
         {
             var result = _paymentServices.UpdateStatus(id, status).Result;
-            if (result.Status.Code != HttpStatusCode.OK)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // POST: api/Tours
@@ -68,11 +55,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<Payment>> PostPayment(PaymentCreateRequest payment)
         {
             var result = await _paymentServices.Create(payment);
-            if (result.Status.Code != HttpStatusCode.Created)
-            {
-                return BadRequest(result);
-            }
-            return Created("", result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // DELETE: api/Tours/5
@@ -80,15 +63,7 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> DeletePayment(int id)
         {
             var result = _paymentServices.Delete(id).Result;
-            if (result.Status.Code == HttpStatusCode.NotFound)
-            {
-                return NotFound(result);
-            }
-            else if (result.Status.Code == HttpStatusCode.BadRequest)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
     }
 }

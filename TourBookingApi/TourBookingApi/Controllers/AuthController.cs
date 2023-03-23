@@ -4,7 +4,6 @@ using DataAccess.DTO.Request;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace TourBookingApi.Controllers
 {
@@ -28,18 +27,14 @@ namespace TourBookingApi.Controllers
         {
             try
             {
-                // Get the JWT token from the Authorization header
                 string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-                // Validate the JWT token
                 if (JwtAuthenticationManager.ValidateJwtToken(token, _configuration))
                 {
-                    // The token is valid and authorized for the "admin" role
                     return Ok("You have access to this endpoint!");
                 }
                 else
                 {
-                    // The token is not valid or not authorized for the "admin" role
                     return Forbid();
                 }
             }
@@ -55,9 +50,9 @@ namespace TourBookingApi.Controllers
             try
             {
                 var result = await _authServices.LoginWithGoogle(data);
-                return Ok(result);
+                return StatusCode((int)result.Status.Code, result);
             }
-            catch (Exception ex)
+            catch
             {
                 return BadRequest("Invalid External Authentication.");
             }
@@ -66,62 +61,54 @@ namespace TourBookingApi.Controllers
         [HttpPost("Login")]
         public ActionResult Login([FromBody] LoginRequest loginRequest)
         {
-            if (string.IsNullOrEmpty(loginRequest.Email.Trim()) || string.IsNullOrEmpty(loginRequest.Password.Trim()))
+            if (ModelState.IsValid)
             {
-                return BadRequest("Email and password not allow null");
+                var result = _authServices.Login(loginRequest);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
             }
 
-            var result = _authServices.Login(loginRequest);
-            if (!result.Status.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+
         }
 
         [HttpPost("admin/Login")]
         public ActionResult LoginAdmin([FromBody] LoginAdminRequest loginRequest)
         {
             var result = _authServices.LoginAdmin(loginRequest);
-            if (!result.Status.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         [HttpPost("Register")]
         public async Task<ActionResult> Post([FromBody] RegisterRequest request)
         {
-            var response = _authServices.Register(request);
-            if (response.Result.Status.Code != HttpStatusCode.Created)
-            {
-                return BadRequest(response.Result);
-            }
-            return Created("", response.Result);
+            var result = _authServices.Register(request).Result;
+            return StatusCode((int)result.Status.Code, result);
         }
 
         [Authorize(Policy = "UserOnly")]
         [HttpPut("ChangePassword")]
         public IActionResult ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.NewPassword) || string.IsNullOrEmpty(request.Password))
+            string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var accountId = JwtAuthenticationManager.GetUserIdFromJwtToken(token, _configuration);
+
+            if (ModelState.IsValid)
             {
-                return BadRequest("Email, password and NewPassword not allow null or empty");
+                if (request.NewPassword.Equals(request.Password))
+                {
+                    return BadRequest("Old password and new password must be diffent");
+                }
+
+                var result = _authServices.ChangePassword(request, int.Parse(accountId)).Result;
+                return StatusCode((int)result.Status.Code, result);
             }
-            if (request.NewPassword.Equals(request.Password))
+            else
             {
-                return BadRequest("Old password and new password must be diffent");
+                return BadRequest(ModelState);
             }
-            request.Email.Trim();
-            request.Password.Trim();
-            request.NewPassword.Trim();
-            var result = _authServices.ChangePassword(request).Result;
-            if (result.Status.Code != HttpStatusCode.OK)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
         }
     }
 }

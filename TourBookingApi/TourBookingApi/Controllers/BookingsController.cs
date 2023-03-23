@@ -5,7 +5,6 @@ using DataAccess.DTO.Response;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace TourBookingApi.Controllers
 {
@@ -14,12 +13,10 @@ namespace TourBookingApi.Controllers
     public class BookingsController : ControllerBase
     {
         private readonly IBookingSevices _bookingServices;
-        private readonly TourBookingContext _context;
         private readonly IConfiguration _configuration;
 
-        public BookingsController(TourBookingContext context, IBookingSevices bookingServices, IConfiguration configuration)
+        public BookingsController(IBookingSevices bookingServices, IConfiguration configuration)
         {
-            _context = context;
             _bookingServices = bookingServices;
             _configuration = configuration;
         }
@@ -29,7 +26,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<IEnumerable<BookingResponse>>> GetBookings([FromQuery] PagingRequest request)
         {
             var result = _bookingServices.GetAll(request);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // GET: api/Bookings/5
@@ -37,7 +34,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<Booking>> GetBooking(int id)
         {
             var result = _bookingServices.Get(id);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // PUT: api/Bookings/5
@@ -46,11 +43,7 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> PutBooking(int id, BookingUpdateRequest booking)
         {
             var result = _bookingServices.Update(id, booking).Result;
-            if (result.Status.Code != HttpStatusCode.OK)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // POST: api/Bookings
@@ -64,11 +57,7 @@ namespace TourBookingApi.Controllers
             booking.CustomerId = int.Parse(customerId);
 
             var result = await _bookingServices.Create(booking);
-            if (result.Status.Code != HttpStatusCode.Created)
-            {
-                return BadRequest(result);
-            }
-            return Created("", result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // DELETE: api/Bookings/5
@@ -76,20 +65,7 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> DeleteBooking(int id)
         {
             var result = _bookingServices.Delete(id).Result;
-            if (result.Status.Code == HttpStatusCode.NotFound)
-            {
-                return NotFound(result);
-            }
-            else if (result.Status.Code == HttpStatusCode.BadRequest)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
-
-        /*private bool BookingExists(int id)
-        {
-            return _context.Bookings.Any(e => e.Id == id);
-        }*/
     }
 }

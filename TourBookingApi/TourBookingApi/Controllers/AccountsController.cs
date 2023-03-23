@@ -21,13 +21,20 @@ namespace TourBookingApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Account>> GetAccounts([FromQuery] PagingRequest request)
         {
-            var result = _accountServices.GetAll(request);
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = _accountServices.GetAll(request);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // GET: api/Accounts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Account>> GetAccount(int id)
+        public ActionResult<Account> GetAccount(int id)
         {
             var result = _accountServices.Get(id);
             return StatusCode((int)result.Status.Code, result);
@@ -36,10 +43,17 @@ namespace TourBookingApi.Controllers
         // PUT: api/Accounts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccount(int id, AccountUpdateResquest account)
+        public IActionResult PutAccount(int id, AccountUpdateResquest account)
         {
-            var result = _accountServices.Update(id, account).Result;
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = _accountServices.Update(id, account).Result;
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // POST: api/Accounts
@@ -47,13 +61,20 @@ namespace TourBookingApi.Controllers
         [HttpPost]
         public async Task<ActionResult<AccountResponse>> PostAccount(AccountCreateRequest account)
         {
-            var result = await _accountServices.Create(account);
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = await _accountServices.Create(account);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // DELETE: api/Accounts/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAccount(int id)
+        public IActionResult DeleteAccount(int id)
         {
             var result = _accountServices.Delete(id).Result;
             return StatusCode((int)result.Status.Code, result);

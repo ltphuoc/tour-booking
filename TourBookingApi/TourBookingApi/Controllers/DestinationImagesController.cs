@@ -38,8 +38,15 @@ namespace TourBookingApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDestinationImage(int id, DestinationImageUpdateRequest destination)
         {
-            var result = _destinationImageServices.Update(id, destination).Result;
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = _destinationImageServices.Update(id, destination).Result;
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // POST: api/Destinations
@@ -47,8 +54,15 @@ namespace TourBookingApi.Controllers
         [HttpPost]
         public async Task<ActionResult<DestinationImageResponse>> PostDestination(DestinationImageCreateRequest destination)
         {
-            var result = await _destinationImageServices.Create(destination);
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = await _destinationImageServices.Create(destination);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // DELETE: api/Destinations/5

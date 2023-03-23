@@ -15,7 +15,7 @@ namespace DataAccess.Services
     {
         BaseResponsePagingViewModel<AccountResponse> GetAll(PagingRequest request);
         BaseResponseViewModel<AccountResponse> Get(int id);
-        Task<BaseResponseViewModel<Account>> Update(int id, AccountUpdateResquest resquest);
+        Task<BaseResponseViewModel<AccountResponse>> Update(int id, AccountUpdateResquest resquest);
         Task<BaseResponseViewModel<AccountResponse>> Delete(int id);
         Task<BaseResponseViewModel<AccountResponse>> Create(AccountCreateRequest request);
     }
@@ -98,12 +98,12 @@ namespace DataAccess.Services
             };
         }
 
-        public async Task<BaseResponseViewModel<Account>> Update(int id, AccountUpdateResquest request)
+        public async Task<BaseResponseViewModel<AccountResponse>> Update(int id, AccountUpdateResquest request)
         {
             var account = GetById(id);
             if (account == null)
             {
-                return new BaseResponseViewModel<Account>
+                return new BaseResponseViewModel<AccountResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -119,7 +119,7 @@ namespace DataAccess.Services
                 await _unitOfWork.Repository<Account>().UpdateDetached(updateAccount);
                 await _unitOfWork.CommitAsync();
 
-                return new BaseResponseViewModel<Account>
+                return new BaseResponseViewModel<AccountResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -127,12 +127,12 @@ namespace DataAccess.Services
                         Message = "Updated",
                         IsSuccess = true
                     },
-                    Data = updateAccount
+                    Data = _mapper.Map<AccountResponse>(updateAccount)
                 };
             }
             catch (DbUpdateConcurrencyException)
             {
-                return new BaseResponseViewModel<Account>
+                return new BaseResponseViewModel<AccountResponse>
                 {
                     Status = new StatusViewModel
                     {
@@ -144,7 +144,7 @@ namespace DataAccess.Services
             }
             catch (DbUpdateException)
             {
-                return new BaseResponseViewModel<Account>
+                return new BaseResponseViewModel<AccountResponse>
                 {
                     Status = new StatusViewModel
                     {
