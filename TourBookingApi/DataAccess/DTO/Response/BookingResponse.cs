@@ -10,7 +10,7 @@ namespace DataAccess.DTO.Response
 {
     public class BookingResponse
     {
-
+        public int Id { get; set; }
         public int TourId { get; set; }
         public int CustomerId { get; set; }
         public DateTime BookingDate { get; set; }
