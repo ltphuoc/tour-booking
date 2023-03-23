@@ -17,6 +17,7 @@ namespace DataAccess.DTO.Response
         public string TourGuideLanguageSpoken { get; set; } = null!;
         public string TourGuideAva { get; set; } = null!;
         public string TourGuideBio { get; set; } = null!;
+        public TourResponse Tour { get; set; }
 
         /*public List<DestinationResponse> Destination { get; set; }*/
     }
