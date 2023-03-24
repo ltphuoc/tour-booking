@@ -22,12 +22,17 @@ namespace TourBookingApi.Controllers
             _configuration = configuration;
         }
 
-        [HttpPost("CheckToken")]
+        [HttpPost("Token")]
         public IActionResult CheckToken()
         {
             try
             {
                 string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                if (token == "")
+                {
+                    return Unauthorized("You can't access to this endpoint!");
+                }
 
                 if (JwtAuthenticationManager.ValidateJwtToken(token, _configuration))
                 {
@@ -40,7 +45,7 @@ namespace TourBookingApi.Controllers
             }
             catch (Exception)
             {
-                return Unauthorized();
+                return Unauthorized("You can't access to this endpoint!");
             }
         }
 
