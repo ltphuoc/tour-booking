@@ -19,5 +19,8 @@ namespace DataAccess.DTO.Response
         public string TourDescription { get; set; } = null!;
 
         public DestinationResponse Destination { get; set; }
+
+        public TransportationResponse Transportation { get; set; }
+
     }
 }
