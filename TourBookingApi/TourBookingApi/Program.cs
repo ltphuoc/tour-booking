@@ -1,4 +1,5 @@
 using Autofac;
+using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
 using BusinessObject.MakeConnection;
 using DataAccess.Helpers;
@@ -6,12 +7,12 @@ using DataAccess.Services;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerUI;
+using Newtonsoft.Json.Serialization;
 using System.Text;
 using TourBookingApi.Mapper;
+using TourBookingApi.NewFolder;
 
 string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -28,7 +29,18 @@ builder.Host.ConfigureContainer<ContainerBuilder>(x => x.RegisterModule(new Auto
 // Add services to the container
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddControllers(options =>
+{
+    options.ValueProviderFactories.Add(new SnakeCaseQueryValueProviderFactory()); //add this...
+}).AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ContractResolver = new DefaultContractResolver
+    {
+        //NamingStrategy = new SnakeCaseNamingStrategy()
+        NamingStrategy = new CamelCaseNamingStrategy()
+    };
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -56,6 +68,7 @@ service.AddControllersWithViews()
 
 service.AddSwaggerGen(c =>
 {
+    c.OperationFilter<SnakecasingParameOperationFilter>();
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "Tour Booking API",
@@ -123,7 +136,7 @@ service.AddAuthorization(options =>
 
 #endregion JWT
 
-//builder.Services.AddAuthorization();
+service.AddRouting(options => options.LowercaseUrls = true);
 
 var app = builder.Build();
 

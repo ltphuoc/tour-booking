@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
-using DataAccess.Common;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using DataAccess.Helpers;
 using Microsoft.EntityFrameworkCore;
-using NTQ.Sdk.Core.Utilities;
+using System.Linq.Dynamic.Core;
 using System.Net;
 using static DataAccess.Common.Constants;
 
@@ -34,8 +34,9 @@ namespace DataAccess.Services
         {
             var query = _unitOfWork.Repository<Destination>().GetAll().Include(d => d.DestinationImages).Where(d => d.Status == Status.INT_ACTIVE_STATUS);
 
-            var destinations = query.Select(x => _mapper.Map<DestinationResponse>(x))
-                .PagingQueryable(request.Page, request.PageSize, Constants.LimitPaging, Constants.DefaultPaging);
+            var dynamicQuery = DynamicQueryHelper.ApplySearchSortAndPaging(query, request);
+
+            var destinations = dynamicQuery.Select(x => _mapper.Map<DestinationResponse>(x));
 
             return new BaseResponsePagingViewModel<DestinationResponse>
             {
@@ -43,9 +44,9 @@ namespace DataAccess.Services
                 {
                     Page = request.Page,
                     Size = request.PageSize,
-                    Total = destinations.Item1
+                    Total = dynamicQuery.Count()
                 },
-                Data = destinations.Item2.ToList(),
+                Data = destinations.ToList()
             };
         }
 

@@ -1,11 +1,4 @@
-﻿using BusinessObject.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DataAccess.DTO.Request
+﻿namespace DataAccess.DTO.Request
 {
     public class TourRequest
     {
@@ -13,11 +6,6 @@ namespace DataAccess.DTO.Request
         public int TourDuration { get; set; } = 0!;
         public int TourCapacity { get; set; } = 0!;
         public int Status { get; set; }
-        /*public List<TourGuideRequest> TourGuides { get; set; }
-        public List<BookingRequest> Bookings { get; set; }*/
-        /*public List<TourDetailRequest> TourDetails { get; set; }*/
-        /*public List<TourPriceRequest> TourPrices { get; set; }*/
-
     }
 
     public class TourUpdateRequest
@@ -34,6 +22,5 @@ namespace DataAccess.DTO.Request
         public int TourDuration { get; set; }
         public int TourCapacity { get; set; }
         public int Status { get; set; }
-        /*public List<TourDetailCreateRequest> TourDetails { get; set; }*/
     }
 }

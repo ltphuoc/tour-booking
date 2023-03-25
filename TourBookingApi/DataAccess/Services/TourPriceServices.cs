@@ -6,12 +6,7 @@ using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.Services
 {
