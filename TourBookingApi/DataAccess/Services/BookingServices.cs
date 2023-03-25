@@ -16,6 +16,7 @@ namespace DataAccess.Services
         BaseResponsePagingViewModel<BookingResponse> GetAll(PagingRequest request);
         BaseResponseViewModel<BookingResponse> Get(int id);
         Task<BaseResponseViewModel<BookingResponse>> Update(int id, BookingUpdateRequest request);
+        Task<BaseResponseViewModel<BookingResponse>> UpdatePaymentStatus(int id, int paymentId, int status);
         Task<BaseResponseViewModel<BookingResponse>> Create(BookingCreateRequest request);
         Task<BaseResponseViewModel<BookingResponse>> Delete(int id);
 
@@ -134,7 +135,6 @@ namespace DataAccess.Services
         public async Task<BaseResponseViewModel<BookingResponse>> Update(int id, BookingUpdateRequest request)
         {
             var booking = GetById(id);
-            //var bookingResponse = _mapper.Map<Booking>(booking);
             if (booking == null)
             {
                 return new BaseResponseViewModel<BookingResponse>
@@ -179,6 +179,243 @@ namespace DataAccess.Services
                 };
             }
         }
+        public async Task<BaseResponseViewModel<BookingResponse>> UpdatePaymentStatuss(int id, int status, int a)
+        {
+            var payment = _unitOfWork.Repository<Booking>()
+                .GetById(id).Result.Payments.Where(p => p.Status.HasValue &&
+                                                p.Status != (int)PaymentStatusEnum.Expired).SingleOrDefault();
+
+            if (payment == null)
+            {
+                return new BaseResponseViewModel<BookingResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.NotFound,
+                        Message = "Not Found",
+                        IsSuccess = false
+                    },
+                    Data = null!
+                };
+            }
+            try
+            {
+                payment.Status = status;
+                await _unitOfWork.Repository<Payment>().UpdateDetached(payment);
+                await _unitOfWork.CommitAsync();
+
+                return new BaseResponseViewModel<BookingResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.OK,
+                        Message = "Updated",
+                        IsSuccess = true
+                    },
+                    Data = _mapper.Map<BookingResponse>(payment.Booking)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponseViewModel<BookingResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.BadRequest,
+                        Message = "Bad Request",
+                        IsSuccess = false
+                    },
+                    Data = null!
+                };
+            }
+        }
+
+        public async Task<BaseResponseViewModel<BookingResponse>> UpdatePaymentStatus(int id, int paymentId, int status)
+        {
+            var booking = await _unitOfWork.Repository<Booking>().GetById(id);
+            if (booking == null)
+            {
+                return new BaseResponseViewModel<BookingResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.NotFound,
+                        Message = "Booking not found",
+                        IsSuccess = false
+                    },
+                    Data = null!
+                };
+            }
+
+            var payment = booking.Payments.FirstOrDefault(p => p.Id == paymentId && p.Status.HasValue && p.Status != (int)PaymentStatusEnum.Expired);
+            if (payment == null)
+            {
+                return new BaseResponseViewModel<BookingResponse>
+                {
+                    Status = new StatusViewModel
+                    {
+                        Code = HttpStatusCode.NotFound,
+                        Message = "Payment not found",
+                        IsSuccess = false
+                    },
+                    Data = null!
+                };
+            }
+
+            //if (payment.PaymentType != PaymentTypeEnum.Full)
+            //{
+            //    return new BaseResponseViewModel<BookingResponse>
+            //    {
+            //        Status = new StatusViewModel
+            //        {
+            //            Code = HttpStatusCode.BadRequest,
+            //            Message = "Invalid payment type",
+            //            IsSuccess = false
+            //        },
+            //        Data = null!
+            //    };
+            //}
+
+            payment.Status = status;
+            await _unitOfWork.Repository<Payment>().UpdateDetached(payment);
+            await _unitOfWork.CommitAsync();
+
+            var bookingResponse = _mapper.Map<BookingResponse>(booking);
+            return new BaseResponseViewModel<BookingResponse>
+            {
+                Status = new StatusViewModel
+                {
+                    Code = HttpStatusCode.OK,
+                    Message = "Payment status updated",
+                    IsSuccess = true
+                },
+                Data = bookingResponse
+            };
+        }
+
+
+        //public async Task<BaseResponseViewModel<BookingResponse>> UpdatePaymentStatus(int id, int paymentId, int status)
+        //{
+        //    var booking = await _unitOfWork.Repository<Booking>().GetById(id);
+        //    if (booking == null)
+        //    {
+        //        return new BaseResponseViewModel<BookingResponse>
+        //        {
+        //            Status = new StatusViewModel
+        //            {
+        //                Code = HttpStatusCode.NotFound,
+        //                Message = "Not Found",
+        //                IsSuccess = false
+        //            },
+        //            Data = null!
+        //        };
+        //    }
+
+        //    var payment = booking.Payments.FirstOrDefault(p => p.Status.HasValue && p.Status != (int)PaymentStatusEnum.Expired);
+        //    if (payment == null)
+        //    {
+        //        return new BaseResponseViewModel<BookingResponse>
+        //        {
+        //            Status = new StatusViewModel
+        //            {
+        //                Code = HttpStatusCode.NotFound,
+        //                Message = "Payment not found",
+        //                IsSuccess = false
+        //            },
+        //            Data = null!
+        //        };
+        //    }
+
+        //    // Check payment type and update payment status accordingly
+        //    //if (payment.Type == PaymentTypeEnum.Half)
+        //    //{
+        //    //    if (status == (int)PaymentStatusEnum.Paid)
+        //    //    {
+        //    //        payment.Status = status;
+        //    //        await _unitOfWork.Repository<Payment>().UpdateDetached(payment);
+        //    //        await _unitOfWork.CommitAsync();
+
+        //    //        // Return the booking with updated payment status
+        //    //        var bookingResponse = _mapper.Map<BookingResponse>(booking);
+        //    //        bookingResponse.IsFullyPaid = false;
+        //    //        return new BaseResponseViewModel<BookingResponse>
+        //    //        {
+        //    //            Status = new StatusViewModel
+        //    //            {
+        //    //                Code = HttpStatusCode.OK,
+        //    //                Message = "Payment status updated",
+        //    //                IsSuccess = true
+        //    //            },
+        //    //            Data = bookingResponse
+        //    //        };
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        return new BaseResponseViewModel<BookingResponse>
+        //    //        {
+        //    //            Status = new StatusViewModel
+        //    //            {
+        //    //                Code = HttpStatusCode.BadRequest,
+        //    //                Message = "Invalid payment status",
+        //    //                IsSuccess = false
+        //    //            },
+        //    //            Data = null!
+        //    //        };
+        //    //    }
+        //    //}
+        //    //else if (payment.Type == PaymentTypeEnum.Full)
+        //    //{
+        //    // Check if all payments for this booking have been made
+        //    var totalPaidAmount = booking.Payments.Sum(p => p.PaymentAmount);
+        //    if (totalPaidAmount == booking.TotalPrice)
+        //    {
+        //        // Update the payment status and return the booking with updated payment status
+        //        payment.Status = status;
+        //        await _unitOfWork.Repository<Payment>().UpdateDetached(payment);
+        //        await _unitOfWork.CommitAsync();
+
+        //        var bookingResponse = _mapper.Map<BookingResponse>(booking);
+        //        //bookingResponse.IsFullyPaid = true;
+        //        return new BaseResponseViewModel<BookingResponse>
+        //        {
+        //            Status = new StatusViewModel
+        //            {
+        //                Code = HttpStatusCode.OK,
+        //                Message = "Payment status updated",
+        //                IsSuccess = true
+        //            },
+        //            Data = bookingResponse
+        //        };
+        //    }
+        //    //else
+        //    //{
+        //    //    return new BaseResponseViewModel<BookingResponse>
+        //    //    {
+        //    //        Status = new StatusViewModel
+        //    //        {
+        //    //            Code = HttpStatusCode.BadRequest,
+        //    //            Message = "Booking has not been fully paid",
+        //    //            IsSuccess = false
+        //    //        },
+        //    //        Data = null!
+        //    //    };
+        //    //}
+        //    //}
+        //    else
+        //    {
+        //        return new BaseResponseViewModel<BookingResponse>
+        //        {
+        //            Status = new StatusViewModel
+        //            {
+        //                Code = HttpStatusCode.BadRequest,
+        //                Message = "Invalid payment type",
+        //                IsSuccess = false
+        //            },
+        //            Data = null!
+        //        };
+        //    }
+        //}
+
 
         public async Task<BaseResponseViewModel<BookingResponse>> Create(BookingCreateRequest request)
         {
@@ -193,7 +430,7 @@ namespace DataAccess.Services
                     PaymentCreateRequest paymentRequest = new PaymentCreateRequest();
                     paymentRequest.BookingId = booking.Id;
                     paymentRequest.PaymentDate = booking.BookingDate;
-                    paymentRequest.Status = (int?)PaymentStatusEnum.Waiting;
+                    paymentRequest.Status = (int?)PaymentStatusEnum.Pending;
                     paymentRequest.PaymentCode = "";
                     paymentRequest.PaymentAmount = booking.TotalPrice;
                     paymentRequest.PaymentMethod = request.PaymentMethod;

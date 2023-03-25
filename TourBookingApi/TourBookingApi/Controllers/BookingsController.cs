@@ -46,6 +46,15 @@ namespace TourBookingApi.Controllers
             return StatusCode((int)result.Status.Code, result);
         }
 
+        [HttpPut("{id}/payment/{payment_id}")]
+        //[HttpPut("{id}/update-status/{status}")]
+        public async Task<IActionResult> PutPaymentStatus(int id, int payment_id, [FromBody] int status = 1)
+        {
+            var result = await _bookingServices.UpdatePaymentStatus(id, payment_id, status);
+            return StatusCode((int)result.Status.Code, result);
+        }
+
+
         // POST: api/Bookings
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
