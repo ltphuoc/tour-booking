@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
-using NTQ.Sdk.Core.Utilities;
+using DataAccess.Helpers;
 using System.Net;
 
 namespace DataAccess.Services
@@ -29,12 +30,12 @@ namespace DataAccess.Services
         }
         public BaseResponsePagingViewModel<TourGuideReponse> GetAll(PagingRequest request)
         {
-            var tourguides = _unitOfWork.Repository<TourGuide>()
-                                .GetAll()
-                                /*.Include(d => d.DestinationImages)*/
-                                /*.ProjectTo<DestinationResponse>(_mapper.ConfigurationProvider)*/
-                                .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
-            var tourguideDTO = _mapper.Map<List<TourGuideReponse>>(tourguides.Item2.ToList());
+            var query = _unitOfWork.Repository<TourGuide>()
+                                .GetAll();
+
+            var dynamicQuery = DynamicQueryHelper.ApplySearchSortAndPaging(query, request);
+
+            var tourguides = dynamicQuery.ProjectTo<TourGuideReponse>(_mapper.ConfigurationProvider);
 
             return new BaseResponsePagingViewModel<TourGuideReponse>
             {
@@ -42,9 +43,9 @@ namespace DataAccess.Services
                 {
                     Page = request.Page,
                     Size = request.PageSize,
-                    Total = tourguides.Item1
+                    Total = tourguides.Count()
                 },
-                Data = tourguideDTO,
+                Data = tourguides.ToList(),
             };
         }
 

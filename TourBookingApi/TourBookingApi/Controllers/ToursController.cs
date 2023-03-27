@@ -1,5 +1,4 @@
-﻿using BusinessObject.Models;
-using DataAccess.DTO.Request;
+﻿using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -12,17 +11,15 @@ namespace TourBookingApi.Controllers
     public class ToursController : ControllerBase
     {
         private readonly ITourSevices _tourServices;
-        private readonly TourBookingContext _context;
 
-        public ToursController(TourBookingContext context, ITourSevices tourServices)
+        public ToursController(ITourSevices tourServices)
         {
-            _context = context;
             _tourServices = tourServices;
         }
 
         // GET: api/Tours
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TourResponse>>> GetTours([FromQuery] PagingRequest request, [FromQuery] int destinationId)
+        public ActionResult<IEnumerable<TourResponse>> GetTours([FromQuery] PagingRequest request, [FromQuery] int destinationId)
         {
             var result = _tourServices.GetAll(request, destinationId);
             return Ok(result);
@@ -78,9 +75,6 @@ namespace TourBookingApi.Controllers
             return Ok(result);
         }
 
-        /*private bool TourExists(int id)
-        {
-            return _context.Tours.Any(e => e.Id == id);
-        }*/
+
     }
 }

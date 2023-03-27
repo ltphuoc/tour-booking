@@ -14,19 +14,35 @@ namespace TourBookingApi.Controllers
     {
         private readonly IBookingSevices _bookingServices;
         private readonly IConfiguration _configuration;
-
-        public BookingsController(IBookingSevices bookingServices, IConfiguration configuration)
+        private readonly IJwtAuthenticationManager _jwtAuthenticationManager;
+        public BookingsController(IBookingSevices bookingServices, IConfiguration configuration, IJwtAuthenticationManager jwtAuthenticationManager)
         {
             _bookingServices = bookingServices;
             _configuration = configuration;
+            _jwtAuthenticationManager = jwtAuthenticationManager;
         }
 
         // GET: api/Bookings
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<BookingResponse>>> GetBookings([FromQuery] PagingRequest request)
         {
-            var result = _bookingServices.GetAll(request);
-            return StatusCode((int)result.Status.Code, result);
+            string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userId = _jwtAuthenticationManager.GetUserIdFromJwtToken(token);
+            if (string.IsNullOrEmpty(userId))
+            {
+                var result = _bookingServices.GetAll(request);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                var result = _bookingServices.GetAll(request, userId);
+                return StatusCode((int)result.Status.Code, result);
+            }
+
+            //var result = _bookingServices.GetAll(request);
+            //return StatusCode((int)result.Status.Code, result);
+
         }
 
         // GET: api/Bookings/5
@@ -62,7 +78,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<Booking>> PostBooking(BookingCreateRequest booking)
         {
             string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            var customerId = JwtAuthenticationManager.GetUserIdFromJwtToken(token, _configuration);
+            var customerId = _jwtAuthenticationManager.GetUserIdFromJwtToken(token);
             booking.CustomerId = int.Parse(customerId);
 
             var result = await _bookingServices.Create(booking);

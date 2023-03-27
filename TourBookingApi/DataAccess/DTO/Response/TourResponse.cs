@@ -9,7 +9,6 @@
         public int Status { get; set; }
         public List<TourDetailResponse> TourDetails { get; set; }
         public List<TourPriceResponse> TourPrices { get; set; }
-
         public List<TourGuideReponse> TourGuides { get; set; }
     }
 }

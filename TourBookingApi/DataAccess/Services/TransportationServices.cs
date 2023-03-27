@@ -4,8 +4,8 @@ using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using DataAccess.Helpers;
 using Microsoft.EntityFrameworkCore;
-using NTQ.Sdk.Core.Utilities;
 using System.Net;
 
 namespace DataAccess.Services
@@ -31,11 +31,13 @@ namespace DataAccess.Services
         }
         public BaseResponsePagingViewModel<TransportationResponse> GetAll(PagingRequest request)
         {
-            var transportation = _unitOfWork.Repository<Transportation>()
+            var query = _unitOfWork.Repository<Transportation>()
                                 .GetAll()
-                                .Include(d => d.TourDetails)
-                                .ProjectTo<TransportationResponse>(_mapper.ConfigurationProvider)
-                                .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
+                                .Include(d => d.TourDetails);
+
+            var dynamicQuery = DynamicQueryHelper.ApplySearchSortAndPaging(query, request);
+
+            var transportations = dynamicQuery.ProjectTo<TransportationResponse>(_mapper.ConfigurationProvider);
 
             return new BaseResponsePagingViewModel<TransportationResponse>
             {
@@ -43,9 +45,9 @@ namespace DataAccess.Services
                 {
                     Page = request.Page,
                     Size = request.PageSize,
-                    Total = transportation.Item1
+                    Total = transportations.Count()
                 },
-                Data = transportation.Item2.ToList(),
+                Data = transportations.ToList(),
             };
         }
 

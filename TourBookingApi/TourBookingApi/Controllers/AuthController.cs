@@ -13,13 +13,12 @@ namespace TourBookingApi.Controllers
     {
         private readonly IAuthServices _authServices;
         private readonly IAccountServices _accountServices;
-        private readonly IConfiguration _configuration;
-
-        public AuthController(IAuthServices loginServices, IAccountServices accountServices, IConfiguration configuration)
+        private readonly IJwtAuthenticationManager _jwtAuthenticationManager;
+        public AuthController(IAuthServices loginServices, IAccountServices accountServices, IJwtAuthenticationManager jwtAuthenticationManager)
         {
             _authServices = loginServices;
             _accountServices = accountServices;
-            _configuration = configuration;
+            _jwtAuthenticationManager = jwtAuthenticationManager;
         }
 
         [HttpPost("Token")]
@@ -34,7 +33,7 @@ namespace TourBookingApi.Controllers
                     return Unauthorized("You can't access to this endpoint!");
                 }
 
-                if (JwtAuthenticationManager.ValidateJwtToken(token, _configuration))
+                if (_jwtAuthenticationManager.ValidateJwtToken(token))
                 {
                     return Ok("You have access to this endpoint!");
                 }
@@ -98,7 +97,7 @@ namespace TourBookingApi.Controllers
         public IActionResult ChangePassword([FromBody] ChangePasswordRequest request)
         {
             string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            var accountId = JwtAuthenticationManager.GetUserIdFromJwtToken(token, _configuration);
+            var accountId = _jwtAuthenticationManager.GetUserIdFromJwtToken(token);
 
             if (ModelState.IsValid)
             {

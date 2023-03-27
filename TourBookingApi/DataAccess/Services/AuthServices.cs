@@ -28,13 +28,14 @@ namespace DataAccess.Services
         private readonly IMapper _mapper;
         private readonly IAccountServices _accountServices;
         private readonly IConfiguration _configuration;
-
-        public AuthServices(IUnitOfWork unitOfWork, IMapper mapper, IAccountServices accountServices, IConfiguration configuration)
+        private readonly IJwtAuthenticationManager _jwtAuthenticationManager;
+        public AuthServices(IUnitOfWork unitOfWork, IMapper mapper, IAccountServices accountServices, IConfiguration configuration, IJwtAuthenticationManager jwtAuthenticationManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _accountServices = accountServices;
             _configuration = configuration;
+            _jwtAuthenticationManager = jwtAuthenticationManager;
         }
 
         public async Task<BaseResponseViewModel<JwtAuthResponse>> LoginWithGoogle(ExternalAuthRequest data)
@@ -75,7 +76,7 @@ namespace DataAccess.Services
 
             var account = _mapper.Map<AccountResponse>(accountDb.Data);
 
-            var newToken = JwtAuthenticationManager.GenerateJwtToken(account.Email, account.Role.ToString(), account.Id.ToString(), _configuration);
+            var newToken = _jwtAuthenticationManager.GenerateJwtToken(account.Email, account.Role.ToString(), account.Id.ToString());
 
             return new BaseResponseViewModel<JwtAuthResponse>
             {
@@ -161,7 +162,7 @@ namespace DataAccess.Services
             }
 
             // generate token
-            var newToken = JwtAuthenticationManager.GenerateJwtToken(account.Email, account.Role.ToString(), account.Id.ToString(), _configuration);
+            var newToken = _jwtAuthenticationManager.GenerateJwtToken(account.Email, account.Role.ToString(), account.Id.ToString());
 
             return new BaseResponseViewModel<JwtAuthResponse>
             {
@@ -322,7 +323,7 @@ namespace DataAccess.Services
                 };
             }
             // generate token
-            var newToken = JwtAuthenticationManager.GenerateJwtToken(username, Constants.Role.INT_ROLE_ADMIN.ToString(), username, _configuration);
+            var newToken = _jwtAuthenticationManager.GenerateJwtToken(username, Constants.Role.INT_ROLE_ADMIN.ToString());
 
             return new BaseResponseViewModel<JwtAuthResponse>
             {

@@ -2,18 +2,21 @@
 using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
+using Castle.Core.Internal;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using DataAccess.Helpers;
 using Microsoft.EntityFrameworkCore;
 using NTQ.Sdk.Core.Utilities;
 using System.Net;
+using static DataAccess.Common.Constants;
 using static DataAccess.Helpers.Enum;
 
 namespace DataAccess.Services
 {
     public interface IBookingSevices
     {
-        BaseResponsePagingViewModel<BookingResponse> GetAll(PagingRequest request);
+        BaseResponsePagingViewModel<BookingResponse> GetAll(PagingRequest request, string userId = "");
         BaseResponseViewModel<BookingResponse> Get(int id);
         Task<BaseResponseViewModel<BookingResponse>> Update(int id, BookingUpdateRequest request);
         Task<BaseResponseViewModel<BookingResponse>> UpdatePaymentStatus(int id, int paymentId, int status);
@@ -31,16 +34,23 @@ namespace DataAccess.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public BaseResponsePagingViewModel<BookingResponse> GetAll(PagingRequest request)
+        public BaseResponsePagingViewModel<BookingResponse> GetAll(PagingRequest request, string userId = "")
         {
-            var bookings = _unitOfWork.Repository<Booking>()
-                                .GetAll()
-                                .Include(d => d.Customer)
-                                .Include(d => d.Tour)
-                                .ProjectTo<BookingResponse>(_mapper.ConfigurationProvider)
-                                .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
+            int userIdInt = 0;
+            if (!string.IsNullOrEmpty(userId.Trim()))
+            {
+                userIdInt = int.Parse(userId.Trim());
+            }
 
-            //var bookingDTO = _mapper.Map<List<BookingResponse>>(bookings.Item2.ToList());
+            var query = _unitOfWork.Repository<Booking>()
+                .GetAll()
+                .Where(b => string.IsNullOrEmpty(userId.Trim()) || b.CustomerId == userIdInt)
+                .Include(d => d.Customer)
+                .Include(d => d.Tour);
+
+            var dynamicQuery = DynamicQueryHelper.ApplySearchSortAndPaging(query, request);
+
+            var bookings = dynamicQuery.ProjectTo<BookingResponse>(_mapper.ConfigurationProvider);
 
             return new BaseResponsePagingViewModel<BookingResponse>
             {
@@ -48,9 +58,9 @@ namespace DataAccess.Services
                 {
                     Page = request.Page,
                     Size = request.PageSize,
-                    Total = bookings.Item1
+                    Total = bookings.Count()
                 },
-                Data = bookings.Item2.ToList(),
+                Data = bookings.ToList(),
             };
         }
 
@@ -99,7 +109,7 @@ namespace DataAccess.Services
 
         public BaseResponseViewModel<BookingResponse> Get(int id)
         {
-            var booking = GetById(id);
+            var booking = GetById(id).Result;
             if (booking == null)
             {
                 return new BaseResponseViewModel<BookingResponse>
@@ -125,16 +135,16 @@ namespace DataAccess.Services
             };
         }
 
-        private Booking GetById(int id)
+        private async Task<Booking> GetById(int id)
         {
-            var booking = _unitOfWork.Repository<Booking>().GetById(id).Result;
+            var booking = await _unitOfWork.Repository<Booking>().GetById(id);
             var result = _mapper.Map<Booking>(booking);
             return result;
         }
 
         public async Task<BaseResponseViewModel<BookingResponse>> Update(int id, BookingUpdateRequest request)
         {
-            var booking = GetById(id);
+            var booking = GetById(id).Result;
             if (booking == null)
             {
                 return new BaseResponseViewModel<BookingResponse>
@@ -474,7 +484,7 @@ namespace DataAccess.Services
 
         public async Task<BaseResponseViewModel<BookingResponse>> Delete(int id)
         {
-            var booking = GetById(id);
+            var booking = GetById(id).Result;
             if (booking == null)
             {
                 return new BaseResponseViewModel<BookingResponse>

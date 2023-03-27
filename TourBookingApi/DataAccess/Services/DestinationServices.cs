@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using DataAccess.DTO.Request;
@@ -36,7 +37,8 @@ namespace DataAccess.Services
 
             var dynamicQuery = DynamicQueryHelper.ApplySearchSortAndPaging(query, request);
 
-            var destinations = dynamicQuery.Select(x => _mapper.Map<DestinationResponse>(x));
+            //var destinations = dynamicQuery.Select(x => _mapper.Map<DestinationResponse>(x));
+            var destinations = dynamicQuery.ProjectTo<DestinationResponse>(_mapper.ConfigurationProvider);
 
             return new BaseResponsePagingViewModel<DestinationResponse>
             {

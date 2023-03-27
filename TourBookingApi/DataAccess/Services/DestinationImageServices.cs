@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
-using DataAccess.Common;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using DataAccess.Helpers;
 using Microsoft.EntityFrameworkCore;
-using NTQ.Sdk.Core.Utilities;
 using System.Net;
 using static DataAccess.Common.Constants;
 
@@ -43,7 +43,6 @@ namespace DataAccess.Services
                     await _unitOfWork.CommitAsync();
                 }
 
-                //var destinations = _unitOfWork.Repository<Destination>().GetById(request.DestinationId);
 
                 return new BaseResponseViewModel<DestinationImageResponse>
                 {
@@ -53,7 +52,7 @@ namespace DataAccess.Services
                         Message = "Created",
                         IsSuccess = true
                     },
-                    //Data = _mapper.Map<DestinationImageResponse>(destinations)
+                    Data = null!
                 };
             }
             catch (Exception ex)
@@ -150,8 +149,9 @@ namespace DataAccess.Services
                                 .GetAll().Include(d => d.Destination).Where(d => d.Destination.Status == Status.INT_ACTIVE_STATUS)
                                 .Where(d => d.DestinationId == destinationId);
 
-            var destinationImages = query.Select(x => _mapper.Map<DestinationImageResponse>(x))
-                .PagingQueryable(request.Page, request.PageSize, Constants.LimitPaging, Constants.DefaultPaging);
+            var dynamicQuery = DynamicQueryHelper.ApplySearchSortAndPaging(query, request);
+
+            var destinationImages = dynamicQuery.ProjectTo<DestinationImageResponse>(_mapper.ConfigurationProvider);
 
             return new BaseResponsePagingViewModel<DestinationImageResponse>
             {
@@ -159,9 +159,9 @@ namespace DataAccess.Services
                 {
                     Page = request.Page,
                     Size = request.PageSize,
-                    Total = destinationImages.Item1
+                    Total = destinationImages.Count()
                 },
-                Data = destinationImages.Item2.ToList(),
+                Data = destinationImages.ToList(),
             };
         }
 

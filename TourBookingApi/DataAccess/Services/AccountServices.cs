@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using DataAccess.Common;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using DataAccess.Helpers;
 using Microsoft.EntityFrameworkCore;
-using NTQ.Sdk.Core.Utilities;
 using System.Net;
 
 namespace DataAccess.Services
@@ -37,8 +38,11 @@ namespace DataAccess.Services
             try
             {
                 var query = _unitOfWork.Repository<Account>().GetAll();
-                var accounts = query.Select(x => _mapper.Map<AccountResponse>(x))
-                    .PagingQueryable(request.Page, request.PageSize, Constants.LimitPaging, Constants.DefaultPaging);
+
+                var dynamicQuery = DynamicQueryHelper.ApplySearchSortAndPaging(query, request);
+
+                //var accounts = dynamicQuery.Select(x => _mapper.Map<AccountResponse>(x));
+                var accounts = dynamicQuery.ProjectTo<AccountResponse>(_mapper.ConfigurationProvider);
 
                 return new BaseResponsePagingViewModel<AccountResponse>
                 {
@@ -52,9 +56,9 @@ namespace DataAccess.Services
                     {
                         Page = request.Page,
                         Size = request.PageSize,
-                        Total = accounts.Item1
+                        Total = accounts.Count()
                     },
-                    Data = accounts.Item2.ToList(),
+                    Data = accounts.ToList(),
                 };
             }
             catch

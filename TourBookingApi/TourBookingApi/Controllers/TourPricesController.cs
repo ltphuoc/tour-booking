@@ -11,11 +11,10 @@ namespace TourBookingApi.Controllers
     public class TourPricesController : ControllerBase
     {
         private readonly ITourPriceSevices _tourPriceServices;
-        private readonly TourBookingContext _context;
 
-        public TourPricesController(TourBookingContext context, ITourPriceSevices tourPriceServices)
+        public TourPricesController(ITourPriceSevices tourPriceServices)
         {
-            _context = context;
+
             _tourPriceServices = tourPriceServices;
         }
 

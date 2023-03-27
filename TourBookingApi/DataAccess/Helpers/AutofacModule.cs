@@ -3,13 +3,6 @@ using BusinessObject.Repository;
 using BusinessObject.UnitOfWork;
 using BusinessObjects.Services;
 using DataAccess.Services;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.Helpers
 {
@@ -35,6 +28,8 @@ namespace DataAccess.Helpers
             builder.RegisterType<TourPriceServices>().As<ITourPriceSevices>();
             builder.RegisterType<PaymentServices>().As<IPaymentSevices>();
             builder.RegisterType<TransportationServices>().As<ITransportationSevices>();
+            builder.RegisterType<JwtAuthenticationManager>().As<IJwtAuthenticationManager>();
+
         }
     }
 }

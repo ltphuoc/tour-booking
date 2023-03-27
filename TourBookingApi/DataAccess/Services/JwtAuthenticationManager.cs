@@ -6,24 +6,32 @@ using System.Text;
 
 namespace BusinessObjects.Services
 {
-    public class JwtAuthenticationManager
+    public interface IJwtAuthenticationManager
     {
-        public JwtAuthenticationManager()
+        bool ValidateJwtToken(string token);
+        string GenerateJwtToken(string username, string role, string userId = "");
+        string? GetUserIdFromJwtToken(string token);
+    }
+    public class JwtAuthenticationManager : IJwtAuthenticationManager
+    {
+        private readonly IConfiguration _configuration;
+        public JwtAuthenticationManager(IConfiguration configuration)
         {
-        }
+            _configuration = configuration;
 
-        public static bool ValidateJwtToken(string token, IConfiguration configuration)
+        }
+        public bool ValidateJwtToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"]);
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = true,
-                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidIssuer = _configuration["Jwt:Issuer"],
                 ValidateAudience = true,
-                ValidAudience = configuration["Jwt:Audience"],
+                ValidAudience = _configuration["Jwt:Audience"],
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             };
@@ -39,10 +47,10 @@ namespace BusinessObjects.Services
             }
         }
 
-        public static string GenerateJwtToken(string username, string role, string userId, IConfiguration configuration)
+        public string GenerateJwtToken(string username, string role, string userId = "")
         {
             var claims = new[] {
-                        new Claim(JwtRegisteredClaimNames.Sub, configuration["Jwt:Subject"]),
+                        new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                         new Claim("UserId", userId),
@@ -50,11 +58,11 @@ namespace BusinessObjects.Services
                         new Claim("Role", role)
                     };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
-                configuration["Jwt:Issuer"],
-                configuration["Jwt:Audience"],
+                _configuration["Jwt:Issuer"],
+                _configuration["Jwt:Audience"],
                 claims,
                 expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: signIn);
@@ -62,19 +70,19 @@ namespace BusinessObjects.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public static string GetUserIdFromJwtToken(string token, IConfiguration configuration)
+        public string? GetUserIdFromJwtToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"]);
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
 
             tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = true,
-                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidIssuer = _configuration["Jwt:Issuer"],
                 ValidateAudience = true,
-                ValidAudience = configuration["Jwt:Audience"],
+                ValidAudience = _configuration["Jwt:Audience"],
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             }, out SecurityToken validatedToken);
@@ -85,5 +93,7 @@ namespace BusinessObjects.Services
 
             return userId;
         }
+
+
     }
 }

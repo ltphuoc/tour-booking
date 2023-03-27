@@ -4,8 +4,8 @@ using BusinessObject.Models;
 using BusinessObject.UnitOfWork;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
+using DataAccess.Helpers;
 using Microsoft.EntityFrameworkCore;
-using NTQ.Sdk.Core.Utilities;
 using System.Net;
 
 namespace DataAccess.Services
@@ -31,25 +31,16 @@ namespace DataAccess.Services
         }
         public BaseResponsePagingViewModel<TourResponse> GetAll(PagingRequest request, int destinationId)
         {
+            var query = _unitOfWork.Repository<Tour>().GetAll().AsQueryable();
 
-            var query = destinationId == 0 ? _unitOfWork.Repository<Tour>()
-                                .GetAll()
-                                .Include(d => d.TourPrices)
-                                .Include(d => d.TourGuides)
-                                .Include(d => d.TourDetails).ThenInclude(t => t.Destination).ThenInclude(t => t.DestinationImages)
-                                : _unitOfWork.Repository<Tour>()
-                                .GetAll()
-                                .Include(d => d.TourDetails).ThenInclude(t => t.Destination).ThenInclude(t => t.DestinationImages)
-                                .Include(d => d.TourPrices)
-                                .Include(d => d.TourGuides)
-                                .Where(d => d.TourDetails.FirstOrDefault()!.DestinationId == destinationId);
+            if (destinationId > 0)
+            {
+                query = query.Where(t => t.TourDetails.Any(td => td.DestinationId == destinationId));
+            }
 
-            //var tours = query.Select(x => _mapper.Map<TourResponse>(x))
-            //    .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
+            var dynamicQuery = DynamicQueryHelper.ApplySearchSortAndPaging(query, request);
 
-            var tours = query
-                                .ProjectTo<TourResponse>(_mapper.ConfigurationProvider)
-                                .PagingQueryable(request.Page, request.PageSize, Common.Constants.LimitPaging, Common.Constants.DefaultPaging);
+            var tours = dynamicQuery.ProjectTo<TourResponse>(_mapper.ConfigurationProvider);
 
             return new BaseResponsePagingViewModel<TourResponse>
             {
@@ -57,54 +48,11 @@ namespace DataAccess.Services
                 {
                     Page = request.Page,
                     Size = request.PageSize,
-                    Total = tours.Item1
+                    Total = tours.Count()
                 },
-                Data = tours.Item2.ToList(),
+                Data = tours.ToList(),
             };
         }
-
-        /*public async Task<BaseResponseViewModel<TourResponse>> Create(TourCreateRequest request)
-        {
-            try
-            {
-                var tour = _mapper.Map<Tour>(request);
-
-                try
-                {
-                    await _unitOfWork.Repository<Tour>().InsertAsync(tour);
-                    await _unitOfWork.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
-
-                return new BaseResponseViewModel<TourResponse>
-                {
-                    Status = new StatusViewModel
-                    {
-                        Code = HttpStatusCode.Created,
-                        Message = "Created",
-                        IsSuccess = true
-                    },
-                    Data = _mapper.Map<TourResponse>(tour)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponseViewModel<TourResponse>
-                {
-                    Status = new StatusViewModel
-                    {
-                        Code = HttpStatusCode.BadRequest,
-                        Message = "Bad Request",
-                        IsSuccess = false
-                    },
-                    Data = null
-                };
-            }
-
-        }*/
 
         public BaseResponseViewModel<TourResponse> Get(int id)
         {
