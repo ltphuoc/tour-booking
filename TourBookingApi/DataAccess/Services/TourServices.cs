@@ -31,7 +31,7 @@ namespace DataAccess.Services
         }
         public BaseResponsePagingViewModel<TourResponse> GetAll(PagingRequest request, int destinationId)
         {
-            var query = _unitOfWork.Repository<Tour>().GetAll().Where(d => d.Status == Status.INT_ACTIVE_STATUS).AsQueryable();
+            var query = _unitOfWork.Repository<Tour>().GetWhere(d => d.Status == Status.INT_ACTIVE_STATUS).Result.AsQueryable();
 
             if (destinationId > 0)
             {
@@ -40,7 +40,9 @@ namespace DataAccess.Services
 
             var dynamicQuery = DynamicQueryHelper.ApplySearchSortAndPaging(query, request);
 
-            var tours = dynamicQuery.ProjectTo<TourResponse>(_mapper.ConfigurationProvider);
+            var tours = dynamicQuery.ProjectTo<TourResponse>(_mapper.ConfigurationProvider).ToList();
+            var totalCount = query.Count();
+
 
             return new BaseResponsePagingViewModel<TourResponse>
             {
@@ -48,9 +50,9 @@ namespace DataAccess.Services
                 {
                     Page = request.Page,
                     Size = request.PageSize,
-                    Total = tours.Count()
+                    Total = totalCount
                 },
-                Data = tours.ToList(),
+                Data = tours,
             };
         }
 
