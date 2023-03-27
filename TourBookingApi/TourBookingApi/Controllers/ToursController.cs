@@ -1,4 +1,5 @@
-﻿using DataAccess.DTO.Request;
+﻿using BusinessObject.Models;
+using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -22,8 +23,15 @@ namespace TourBookingApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<TourResponse>> GetTours([FromQuery] PagingRequest request, [FromQuery] int destinationId)
         {
-            var result = _tourServices.GetAll(request, destinationId);
-            return Ok(result);
+            if (ModelState.IsValid)
+            {
+                var result = _tourServices.GetAll(request, destinationId);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // GET: api/Tours/5
@@ -31,7 +39,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<TourResponse>> GetTour(int id)
         {
             var result = _tourServices.Get(id);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // PUT: api/Tours/5
@@ -40,12 +48,15 @@ namespace TourBookingApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTour(int id, TourUpdateRequest tour)
         {
-            var result = _tourServices.Update(id, tour).Result;
-            if (result.Status.Code != HttpStatusCode.OK)
+            if (ModelState.IsValid)
             {
-                return BadRequest(result);
+                var result = _tourServices.Update(id, tour).Result;
+                return StatusCode((int)result.Status.Code, result);
             }
-            return Ok(result);
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // POST: api/Tours
@@ -54,12 +65,15 @@ namespace TourBookingApi.Controllers
         [HttpPost]
         public async Task<ActionResult<TourResponse>> PostTour(TourCreateRequest tour)
         {
-            var result = await _tourServices.Create(tour);
-            if (result.Status.Code != HttpStatusCode.Created)
+            if (ModelState.IsValid)
             {
-                return BadRequest(result);
+                var result = await _tourServices.Create(tour);
+                return StatusCode((int)result.Status.Code, result);
             }
-            return Created("", result);
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // DELETE: api/Tours/5
@@ -68,15 +82,7 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> DeleteTour(int id)
         {
             var result = _tourServices.Delete(id).Result;
-            if (result.Status.Code == HttpStatusCode.NotFound)
-            {
-                return NotFound(result);
-            }
-            else if (result.Status.Code == HttpStatusCode.BadRequest)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
 

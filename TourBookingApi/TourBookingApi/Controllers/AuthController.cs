@@ -4,7 +4,6 @@ using DataAccess.DTO.Request;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace TourBookingApi.Controllers
 {

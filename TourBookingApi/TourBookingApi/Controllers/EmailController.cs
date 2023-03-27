@@ -1,6 +1,5 @@
 ﻿using DataAccess.DTO.Request;
 using DataAccess.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TourBookingApi.Controllers

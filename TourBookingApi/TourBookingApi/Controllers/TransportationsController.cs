@@ -1,9 +1,7 @@
-﻿using BusinessObject.Models;
-using DataAccess.DTO.Request;
+﻿using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace TourBookingApi.Controllers
 {
@@ -12,11 +10,9 @@ namespace TourBookingApi.Controllers
     public class TransportationsController : ControllerBase
     {
         private readonly ITransportationSevices _transportationServices;
-        private readonly TourBookingContext _context;
 
-        public TransportationsController(TourBookingContext context, ITransportationSevices transportationServices)
+        public TransportationsController(ITransportationSevices transportationServices)
         {
-            _context = context;
             _transportationServices = transportationServices;
         }
 
@@ -24,8 +20,15 @@ namespace TourBookingApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TransportationResponse>>> GetTransportations([FromQuery] PagingRequest request)
         {
-            var result = _transportationServices.GetAll(request);
-            return Ok(result);
+            if (ModelState.IsValid)
+            {
+                var result = _transportationServices.GetAll(request);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // GET: api/Tours/5
@@ -33,7 +36,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<TransportationResponse>> GetTransportation(int id)
         {
             var result = _transportationServices.Get(id);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // PUT: api/Tours/5
@@ -41,12 +44,15 @@ namespace TourBookingApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTransportation(int id, TransportationUpdateRequest transportation)
         {
-            var result = _transportationServices.Update(id, transportation).Result;
-            if (result.Status.Code != HttpStatusCode.NoContent)
+            if (ModelState.IsValid)
             {
-                return BadRequest(result);
+                var result = _transportationServices.Update(id, transportation).Result;
+                return StatusCode((int)result.Status.Code, result);
             }
-            return NoContent();
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // POST: api/Tours
@@ -54,12 +60,15 @@ namespace TourBookingApi.Controllers
         [HttpPost]
         public async Task<ActionResult<TransportationResponse>> PostTransportation(TransportationCreateRequest transportation)
         {
-            var result = await _transportationServices.Create(transportation);
-            if (result.Status.Code != HttpStatusCode.Created)
+            if (ModelState.IsValid)
             {
-                return BadRequest(result);
+                var result = await _transportationServices.Create(transportation);
+                return StatusCode((int)result.Status.Code, result);
             }
-            return Created("", result);
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // DELETE: api/Tours/5
@@ -67,15 +76,7 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> DeleteTransportation(int id)
         {
             var result = _transportationServices.Delete(id).Result;
-            if (result.Status.Code == HttpStatusCode.NotFound)
-            {
-                return NotFound(result);
-            }
-            else if (result.Status.Code == HttpStatusCode.BadRequest)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
     }
 }

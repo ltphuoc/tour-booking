@@ -2,7 +2,6 @@
 using DataAccess.DTO.Request;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace TourBookingApi.Controllers
 {
@@ -14,7 +13,6 @@ namespace TourBookingApi.Controllers
 
         public TourPricesController(ITourPriceSevices tourPriceServices)
         {
-
             _tourPriceServices = tourPriceServices;
         }
 
@@ -22,8 +20,15 @@ namespace TourBookingApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TourPrice>>> GetTourPrices([FromQuery] PagingRequest request)
         {
-            var result = _tourPriceServices.GetAll(request);
-            return Ok(result);
+            if (ModelState.IsValid)
+            {
+                var result = _tourPriceServices.GetAll(request);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // GET: api/TourPrices/5
@@ -31,7 +36,7 @@ namespace TourBookingApi.Controllers
         public async Task<ActionResult<TourPrice>> GetTourPrice(int id)
         {
             var result = _tourPriceServices.Get(id);
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
 
         // PUT: api/TourPrices/5
@@ -39,12 +44,15 @@ namespace TourBookingApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTourPrice(int id, TourPriceUpdateRequest tourPrice)
         {
-            var result = _tourPriceServices.Update(id, tourPrice).Result;
-            if (result.Status.Code != HttpStatusCode.OK)
+            if (ModelState.IsValid)
             {
-                return BadRequest(result);
+                var result = _tourPriceServices.Update(id, tourPrice).Result;
+                return StatusCode((int)result.Status.Code, result);
             }
-            return Ok(result);
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // POST: api/TourPrices
@@ -52,12 +60,15 @@ namespace TourBookingApi.Controllers
         [HttpPost]
         public async Task<ActionResult<TourPrice>> PostTourPrice(TourPriceCreateRequest tourPrice)
         {
-            var result = await _tourPriceServices.Create(tourPrice);
-            if (result.Status.Code != HttpStatusCode.Created)
+            if (ModelState.IsValid)
             {
-                return BadRequest(result);
+                var result = await _tourPriceServices.Create(tourPrice);
+                return StatusCode((int)result.Status.Code, result);
             }
-            return Created("", result);
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // DELETE: api/TourPrices/5
@@ -65,15 +76,7 @@ namespace TourBookingApi.Controllers
         public async Task<IActionResult> DeleteTourPrice(int id)
         {
             var result = _tourPriceServices.Delete(id).Result;
-            if (result.Status.Code == HttpStatusCode.NotFound)
-            {
-                return NotFound(result);
-            }
-            else if (result.Status.Code == HttpStatusCode.BadRequest)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return StatusCode((int)result.Status.Code, result);
         }
     }
 }
