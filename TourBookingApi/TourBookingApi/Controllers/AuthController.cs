@@ -51,7 +51,6 @@ namespace TourBookingApi.Controllers
             }
         }
 
-        [Authorize(Policy = "UserOnly")]
         [HttpPost("Google-Login")]
         public async Task<ActionResult<JwtAuthResponse>> LoginWithGoogle([FromBody] ExternalAuthRequest data)
         {
@@ -96,7 +95,6 @@ namespace TourBookingApi.Controllers
             return StatusCode((int)result.Status.Code, result);
         }
 
-        [Authorize(Policy = "UserOnly")]
         [HttpPost("Register")]
         public async Task<ActionResult> Post([FromBody] RegisterRequest request)
         {
