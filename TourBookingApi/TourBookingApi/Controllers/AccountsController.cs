@@ -2,10 +2,12 @@
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TourBookingApi.Controllers
 {
+    [Authorize(Policy = "AdminOnly")]
     [Route("api/[controller]")]
     [ApiController]
     public class AccountsController : ControllerBase

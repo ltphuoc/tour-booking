@@ -57,6 +57,7 @@ namespace DataAccess.DTO.Request
 
     public class ExternalAuthRequest
     {
+        [Required]
         public string IdToken { get; set; }
     }
 

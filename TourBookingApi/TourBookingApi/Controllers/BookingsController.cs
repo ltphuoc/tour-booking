@@ -8,23 +8,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TourBookingApi.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class BookingsController : ControllerBase
     {
         private readonly IBookingSevices _bookingServices;
-        private readonly IConfiguration _configuration;
         private readonly IJwtAuthenticationManager _jwtAuthenticationManager;
-        public BookingsController(IBookingSevices bookingServices, IConfiguration configuration, IJwtAuthenticationManager jwtAuthenticationManager)
+        public BookingsController(IBookingSevices bookingServices, IJwtAuthenticationManager jwtAuthenticationManager)
         {
             _bookingServices = bookingServices;
-            _configuration = configuration;
             _jwtAuthenticationManager = jwtAuthenticationManager;
         }
 
         // GET: api/Bookings
         [HttpGet]
-        [Authorize]
+
         public async Task<ActionResult<IEnumerable<BookingResponse>>> GetBookings([FromQuery] PagingRequest request)
         {
             string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -39,10 +38,6 @@ namespace TourBookingApi.Controllers
                 var result = _bookingServices.GetAll(request, userId);
                 return StatusCode((int)result.Status.Code, result);
             }
-
-            //var result = _bookingServices.GetAll(request);
-            //return StatusCode((int)result.Status.Code, result);
-
         }
 
         // GET: api/Bookings/5
@@ -63,23 +58,20 @@ namespace TourBookingApi.Controllers
         }
 
         [HttpPut("{id}/payment/{payment_id}")]
-        //[HttpPut("{id}/update-status/{status}")]
         public async Task<IActionResult> PutPaymentStatus(int id, int payment_id, [FromBody] int status = 1)
         {
             var result = await _bookingServices.UpdatePaymentStatus(id, payment_id, status);
             return StatusCode((int)result.Status.Code, result);
         }
 
-
         // POST: api/Bookings
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<Booking>> PostBooking(BookingCreateRequest booking)
         {
             string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var customerId = _jwtAuthenticationManager.GetUserIdFromJwtToken(token);
-            booking.CustomerId = int.Parse(customerId);
+            booking.CustomerId = int.Parse(customerId!);
 
             var result = await _bookingServices.Create(booking);
             return StatusCode((int)result.Status.Code, result);

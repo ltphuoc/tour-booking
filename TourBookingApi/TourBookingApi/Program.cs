@@ -1,5 +1,4 @@
 using Autofac;
-using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
 using BusinessObject.MakeConnection;
 using DataAccess.Helpers;

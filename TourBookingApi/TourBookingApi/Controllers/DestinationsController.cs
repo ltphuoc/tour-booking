@@ -1,6 +1,8 @@
-﻿using DataAccess.DTO.Request;
+﻿using BusinessObject.Models;
+using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TourBookingApi.Controllers
@@ -21,8 +23,15 @@ namespace TourBookingApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<DestinationResponse>> GetDestinations([FromQuery] PagingRequest request)
         {
-            var result = _destinationServices.GetAll(request);
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = _destinationServices.GetAll(request);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // GET: api/Destinations/5
@@ -35,6 +44,7 @@ namespace TourBookingApi.Controllers
 
         // PUT: api/Destinations/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDestination(int id, DestinationUpdateRequest destination)
         {
@@ -51,6 +61,7 @@ namespace TourBookingApi.Controllers
 
         // POST: api/Destinations
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<ActionResult<DestinationResponse>> PostDestination(DestinationCreateRequest destination)
         {
@@ -66,6 +77,7 @@ namespace TourBookingApi.Controllers
         }
 
         // DELETE: api/Destinations/5
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDestination(int id)
         {

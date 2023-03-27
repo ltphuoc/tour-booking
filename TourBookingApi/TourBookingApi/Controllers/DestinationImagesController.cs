@@ -1,6 +1,7 @@
 ﻿using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TourBookingApi.Controllers
@@ -21,20 +22,36 @@ namespace TourBookingApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<DestinationImageResponse>> GetDestinationImages([FromQuery] PagingRequest request, [FromQuery] int destinationId)
         {
-            var result = _destinationImageServices.GetAll(request, destinationId);
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = _destinationImageServices.GetAll(request, destinationId);
+
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // GET: api/Destinations/5
         [HttpGet("{id}")]
         public ActionResult<DestinationImageResponse> GetDestinationImage(int id)
         {
-            var result = _destinationImageServices.Get(id);
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = _destinationImageServices.Get(id);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // PUT: api/Destinations/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDestinationImage(int id, DestinationImageUpdateRequest destination)
         {
@@ -51,6 +68,7 @@ namespace TourBookingApi.Controllers
 
         // POST: api/Destinations
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<ActionResult<DestinationImageResponse>> PostDestination(DestinationImageCreateRequest destination)
         {
@@ -66,11 +84,19 @@ namespace TourBookingApi.Controllers
         }
 
         // DELETE: api/Destinations/5
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDestination(int id)
         {
-            var result = _destinationImageServices.Delete(id).Result;
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = _destinationImageServices.Delete(id).Result;
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
     }
 }

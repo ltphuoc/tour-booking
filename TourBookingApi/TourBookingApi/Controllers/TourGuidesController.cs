@@ -2,6 +2,7 @@
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -38,6 +39,7 @@ namespace TourBookingApi.Controllers
 
         // PUT: api/TourGuides/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTourGuide(int id, TourGuideUpdateRequest tourGuide)
         {
@@ -51,6 +53,7 @@ namespace TourBookingApi.Controllers
 
         // POST: api/TourGuides
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<ActionResult<TourGuide>> PostTourGuide(TourGuideCreateRequest tourGuide)
         {
@@ -63,6 +66,7 @@ namespace TourBookingApi.Controllers
         }
 
         // DELETE: api/TourGuides/5
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTourGuide(int id)
         {

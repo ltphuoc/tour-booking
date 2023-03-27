@@ -2,6 +2,7 @@
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -12,11 +13,9 @@ namespace TourBookingApi.Controllers
     public class TourDetailsController : ControllerBase
     {
         private readonly ITourDetailSevices _tourdetailServices;
-        private readonly TourBookingContext _context;
 
-        public TourDetailsController(TourBookingContext context, ITourDetailSevices tourdetailServices)
+        public TourDetailsController(ITourDetailSevices tourdetailServices)
         {
-            _context = context;
             _tourdetailServices = tourdetailServices;
         }
 
@@ -38,6 +37,7 @@ namespace TourBookingApi.Controllers
 
         // PUT: api/TourDetails/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTourDetail(int id, TourDetailUpdateRequest tourdetail)
         {
@@ -51,6 +51,7 @@ namespace TourBookingApi.Controllers
 
         // POST: api/TourDetails
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<ActionResult<TourDetailResponse>> PostTourDetail(TourDetailCreateRequest tourdetail)
         {
@@ -63,6 +64,7 @@ namespace TourBookingApi.Controllers
         }
 
         // DELETE: api/TourDetails/5
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTourDetail(int id)
         {

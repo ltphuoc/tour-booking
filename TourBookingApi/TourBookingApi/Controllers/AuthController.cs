@@ -4,6 +4,7 @@ using DataAccess.DTO.Request;
 using DataAccess.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace TourBookingApi.Controllers
 {
@@ -21,21 +22,24 @@ namespace TourBookingApi.Controllers
             _jwtAuthenticationManager = jwtAuthenticationManager;
         }
 
-        [HttpPost("Token")]
+        [Authorize(Policy = "UserOnly")]
+        [HttpGet("info")]
         public IActionResult CheckToken()
         {
             try
             {
                 string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-                if (token == "")
+                if (string.IsNullOrEmpty(token))
                 {
                     return Unauthorized("You can't access to this endpoint!");
                 }
 
                 if (_jwtAuthenticationManager.ValidateJwtToken(token))
                 {
-                    return Ok("You have access to this endpoint!");
+                    var userId = _jwtAuthenticationManager.GetUserIdFromJwtToken(token);
+                    var result = _accountServices.Get(int.Parse(userId!));
+                    return Ok(result);
                 }
                 else
                 {
@@ -48,17 +52,25 @@ namespace TourBookingApi.Controllers
             }
         }
 
-        [HttpPost("LoginWithGoogle")]
+        [Authorize(Policy = "UserOnly")]
+        [HttpPost("Google-Login")]
         public async Task<ActionResult<JwtAuthResponse>> LoginWithGoogle([FromBody] ExternalAuthRequest data)
         {
-            try
+            if (ModelState.IsValid)
             {
-                var result = await _authServices.LoginWithGoogle(data);
-                return StatusCode((int)result.Status.Code, result);
+                try
+                {
+                    var result = await _authServices.LoginWithGoogle(data);
+                    return StatusCode((int)result.Status.Code, result);
+                }
+                catch
+                {
+                    return BadRequest("Invalid External Authentication.");
+                }
             }
-            catch
+            else
             {
-                return BadRequest("Invalid External Authentication.");
+                return BadRequest(ModelState);
             }
         }
 
@@ -85,6 +97,7 @@ namespace TourBookingApi.Controllers
             return StatusCode((int)result.Status.Code, result);
         }
 
+        [Authorize(Policy = "UserOnly")]
         [HttpPost("Register")]
         public async Task<ActionResult> Post([FromBody] RegisterRequest request)
         {
@@ -93,7 +106,7 @@ namespace TourBookingApi.Controllers
         }
 
         [Authorize(Policy = "UserOnly")]
-        [HttpPut("ChangePassword")]
+        [HttpPut("password")]
         public IActionResult ChangePassword([FromBody] ChangePasswordRequest request)
         {
             string token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");

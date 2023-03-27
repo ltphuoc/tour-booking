@@ -1,10 +1,13 @@
 ﻿using BusinessObject.Models;
 using DataAccess.DTO.Request;
 using DataAccess.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Build.Framework;
 
 namespace TourBookingApi.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PaymentsController : ControllerBase
@@ -21,16 +24,30 @@ namespace TourBookingApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Payment>>> GetPayments([FromQuery] PagingRequest request)
         {
-            var result = _paymentServices.GetAll(request);
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = _paymentServices.GetAll(request);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // GET: api/Tours/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Payment>> GetPayment(int id)
         {
-            var result = _paymentServices.Get(id);
-            return StatusCode((int)result.Status.Code, result);
+            if (ModelState.IsValid)
+            {
+                var result = _paymentServices.Get(id);
+                return StatusCode((int)result.Status.Code, result);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
         }
 
         // PUT: api/Tours/5
@@ -59,6 +76,7 @@ namespace TourBookingApi.Controllers
         }
 
         // DELETE: api/Tours/5
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePayment(int id)
         {

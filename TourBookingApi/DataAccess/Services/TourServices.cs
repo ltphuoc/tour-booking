@@ -5,7 +5,6 @@ using BusinessObject.UnitOfWork;
 using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Helpers;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace DataAccess.Services
