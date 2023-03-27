@@ -6,6 +6,7 @@ using DataAccess.DTO.Request;
 using DataAccess.DTO.Response;
 using DataAccess.Helpers;
 using System.Net;
+using static DataAccess.Common.Constants;
 
 namespace DataAccess.Services
 {
@@ -30,7 +31,7 @@ namespace DataAccess.Services
         }
         public BaseResponsePagingViewModel<TourResponse> GetAll(PagingRequest request, int destinationId)
         {
-            var query = _unitOfWork.Repository<Tour>().GetAll().AsQueryable();
+            var query = _unitOfWork.Repository<Tour>().GetAll().Where(d => d.Status == Status.INT_ACTIVE_STATUS).AsQueryable();
 
             if (destinationId > 0)
             {
@@ -197,28 +198,30 @@ namespace DataAccess.Services
             }
             try
             {
-                var bookings = tour.Bookings.ToList();
-                foreach (var booking in bookings)
-                {
-                    _unitOfWork.Repository<Booking>().Delete(booking);
-                }
-                var tourDetails = tour.TourDetails.ToList();
-                foreach (var tourDetail in tourDetails)
-                {
-                    _unitOfWork.Repository<TourDetail>().Delete(tourDetail);
-                }
-                var tourPrices = tour.TourPrices.ToList();
-                foreach (var tourPrice in tourPrices)
-                {
-                    _unitOfWork.Repository<TourPrice>().Delete(tourPrice);
-                }
+                //var bookings = tour.Bookings.ToList();
+                //foreach (var booking in bookings)
+                //{
+                //    _unitOfWork.Repository<Booking>().Delete(booking);
+                //}
+                //var tourDetails = tour.TourDetails.ToList();
+                //foreach (var tourDetail in tourDetails)
+                //{
+                //    _unitOfWork.Repository<TourDetail>().Delete(tourDetail);
+                //}
+                //var tourPrices = tour.TourPrices.ToList();
+                //foreach (var tourPrice in tourPrices)
+                //{
+                //    _unitOfWork.Repository<TourPrice>().Delete(tourPrice);
+                //}
                 //var tourGuides = tour.TourGuides.ToList();
                 //foreach (var tourGuide in tourGuides)
                 //{
                 //    _unitOfWork.Repository<TourGuide>().Delete(tourGuide);
                 //}
+                tour.Status = Status.INT_DELETED_STATUS;
 
-                _unitOfWork.Repository<Tour>().Delete(tour);
+                await _unitOfWork.Repository<Tour>().UpdateDetached(tour);
+                //_unitOfWork.Repository<Tour>().Delete(tour);
                 await _unitOfWork.CommitAsync();
 
                 return new BaseResponseViewModel<TourResponse>
