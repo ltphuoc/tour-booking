@@ -23,7 +23,7 @@
         public string TourGuideAva { get; set; } = null!;
         public string TourGuideBio { get; set; } = null!;
 
-        public int TourId { get; set; }
+        //public int TourId { get; set; }
 
        /* public List<TourRequest> Tour { get; set; }*/
     }
@@ -38,7 +38,7 @@
         public string TourGuideAva { get; set; } = null!;
         public string TourGuideBio { get; set; } = null!;
 
-        public int TourId { get; set; }
+        //public int TourId { get; set; }
 
        
        /* public List<TourRequest>? Tour { get; set; }*/

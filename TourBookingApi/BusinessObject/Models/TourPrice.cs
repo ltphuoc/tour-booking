@@ -1,4 +1,7 @@
-﻿namespace BusinessObject.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace BusinessObject.Models
 {
     public partial class TourPrice
     {

@@ -1,4 +1,7 @@
-﻿namespace BusinessObject.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace BusinessObject.Models
 {
     public partial class Destination
     {
@@ -13,6 +16,7 @@
         public string Region { get; set; } = null!;
         public string Description { get; set; } = null!;
         public int Status { get; set; }
+
         public virtual ICollection<DestinationImage> DestinationImages { get; set; }
         public virtual ICollection<TourDetail> TourDetails { get; set; }
     }

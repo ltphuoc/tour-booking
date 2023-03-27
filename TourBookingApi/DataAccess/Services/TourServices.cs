@@ -212,11 +212,11 @@ namespace DataAccess.Services
                 {
                     _unitOfWork.Repository<TourPrice>().Delete(tourPrice);
                 }
-                var tourGuides = tour.TourGuides.ToList();
-                foreach (var tourGuide in tourGuides)
-                {
-                    _unitOfWork.Repository<TourGuide>().Delete(tourGuide);
-                }
+                //var tourGuides = tour.TourGuides.ToList();
+                //foreach (var tourGuide in tourGuides)
+                //{
+                //    _unitOfWork.Repository<TourGuide>().Delete(tourGuide);
+                //}
 
                 _unitOfWork.Repository<Tour>().Delete(tour);
                 await _unitOfWork.CommitAsync();

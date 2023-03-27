@@ -193,11 +193,11 @@ namespace DataAccess.Services
             }
             try
             {
-                var tours = tourGuide.Tour;
-                if (tours != null)
-                {
-                    _unitOfWork.Repository<Tour>().Delete(tours);
-                }
+                //var tours = tourGuide.Tour;
+                //if (tours != null)
+                //{
+                //    _unitOfWork.Repository<Tour>().Delete(tours);
+                //}
 
                 _unitOfWork.Repository<TourGuide>().Delete(tourGuide);
                 await _unitOfWork.CommitAsync();

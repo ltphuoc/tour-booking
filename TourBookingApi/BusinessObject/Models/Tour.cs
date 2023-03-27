@@ -1,4 +1,7 @@
-﻿namespace BusinessObject.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace BusinessObject.Models
 {
     public partial class Tour
     {
@@ -6,7 +9,6 @@
         {
             Bookings = new HashSet<Booking>();
             TourDetails = new HashSet<TourDetail>();
-            TourGuides = new HashSet<TourGuide>();
             TourPrices = new HashSet<TourPrice>();
         }
 
@@ -17,9 +19,9 @@
         public int Status { get; set; }
         public int? TourGuideId { get; set; }
 
-        public virtual ICollection<Booking> Bookings { get; set; } = null;
-        public virtual ICollection<TourDetail> TourDetails { get; set; } = null;
-        public virtual ICollection<TourGuide> TourGuides { get; set; } = null;
-        public virtual ICollection<TourPrice> TourPrices { get; set; } = null;
+        public virtual TourGuide? TourGuide { get; set; }
+        public virtual ICollection<Booking> Bookings { get; set; }
+        public virtual ICollection<TourDetail> TourDetails { get; set; }
+        public virtual ICollection<TourPrice> TourPrices { get; set; }
     }
 }

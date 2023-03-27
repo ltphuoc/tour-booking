@@ -1,4 +1,7 @@
-﻿namespace BusinessObject.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace BusinessObject.Models
 {
     public partial class Account
     {
@@ -14,12 +17,13 @@
         public string Phone { get; set; } = null!;
         public string Address { get; set; } = null!;
         public string LastName { get; set; } = null!;
-        public string? City { get; set; } = null!;
-        public string? Province { get; set; } = null!;
-        public string? District { get; set; } = null!;
-        public string? Avatar { get; set; } = null!;
-        public int Role { get; set; } = 0!;
-        public int Status { get; set; } = 0!;
+        public string? City { get; set; }
+        public string? Province { get; set; }
+        public string? District { get; set; }
+        public int Role { get; set; }
+        public string? Avatar { get; set; }
+        public int Status { get; set; }
+
         public virtual ICollection<Booking> Bookings { get; set; }
     }
 }

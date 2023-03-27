@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace BusinessObject.Models
 {
@@ -18,7 +21,7 @@ namespace BusinessObject.Models
         public virtual DbSet<Destination> Destinations { get; set; } = null!;
         public virtual DbSet<DestinationImage> DestinationImages { get; set; } = null!;
         public virtual DbSet<Payment> Payments { get; set; } = null!;
-        //public virtual DbSet<Role> Roles { get; set; } = null!;
+        public virtual DbSet<Role> Roles { get; set; } = null!;
         public virtual DbSet<Tour> Tours { get; set; } = null!;
         public virtual DbSet<TourDetail> TourDetails { get; set; } = null!;
         public virtual DbSet<TourGuide> TourGuides { get; set; } = null!;
@@ -30,7 +33,7 @@ namespace BusinessObject.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=PHUOC-LAPTOP\\PHUOCLT;database=TourBooking;uid=sa;pwd=1234567890;Trusted_Connection=true");
+                optionsBuilder.UseSqlServer("server=PHUOC-LAPTOP\\PHUOCLT;database=TourBooking;uid=sa;pwd=1234567890;trusted_connection=true;", x => x.UseNetTopologySuite());
             }
         }
 
@@ -46,6 +49,18 @@ namespace BusinessObject.Models
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("address");
+
+                entity.Property(e => e.Avatar).HasColumnName("avatar");
+
+                entity.Property(e => e.City)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("city");
+
+                entity.Property(e => e.District)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("district");
 
                 entity.Property(e => e.Email)
                     .HasMaxLength(255)
@@ -72,28 +87,18 @@ namespace BusinessObject.Models
                     .IsUnicode(false)
                     .HasColumnName("phone");
 
-                entity.Property(e => e.City)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("city");
-
                 entity.Property(e => e.Province)
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("province");
 
-                entity.Property(e => e.District)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("district");
+                entity.Property(e => e.Role)
+                    .HasColumnName("role")
+                    .HasDefaultValueSql("((2))");
 
-                entity.Property(e => e.Avatar)
-                    .IsUnicode(false)
-                    .HasColumnName("avatar");
-
-                entity.Property(e => e.Role).HasColumnName("role");
-
-                entity.Property(e => e.Status).HasColumnName("status");
+                entity.Property(e => e.Status)
+                    .HasColumnName("status")
+                    .HasDefaultValueSql("((1))");
             });
 
             modelBuilder.Entity<Booking>(entity =>
@@ -130,7 +135,7 @@ namespace BusinessObject.Models
                     .WithMany(p => p.Bookings)
                     .HasForeignKey(d => d.TourId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Booking__tour_id__628FA481");
+                    .HasConstraintName("FK__Booking__tour_id__5BE2A6F2");
             });
 
             modelBuilder.Entity<Destination>(entity =>
@@ -170,7 +175,7 @@ namespace BusinessObject.Models
                     .WithMany(p => p.DestinationImages)
                     .HasForeignKey(d => d.DestinationId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Destinati__desti__4BAC3F29");
+                    .HasConstraintName("FK__Destinati__desti__5DCAEF64");
             });
 
             modelBuilder.Entity<Payment>(entity =>
@@ -185,9 +190,15 @@ namespace BusinessObject.Models
                     .HasColumnType("decimal(10, 2)")
                     .HasColumnName("payment_amount");
 
+                entity.Property(e => e.PaymentCode)
+                    .HasMaxLength(50)
+                    .HasColumnName("payment_code");
+
                 entity.Property(e => e.PaymentDate)
                     .HasColumnType("date")
                     .HasColumnName("payment_date");
+
+                entity.Property(e => e.PaymentImage).HasColumnName("payment_image");
 
                 entity.Property(e => e.PaymentMethod)
                     .HasMaxLength(255)
@@ -196,36 +207,26 @@ namespace BusinessObject.Models
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
-                entity.Property(e => e.PaymentCode).HasColumnName("payment_code");
-
-                entity.Property(e => e.PaymentImage).HasColumnName("payment_image");
-
                 entity.HasOne(d => d.Booking)
                     .WithMany(p => p.Payments)
                     .HasForeignKey(d => d.BookingId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Payment__booking__66603565");
+                    .HasConstraintName("FK__Payment__booking__60A75C0F");
             });
 
-            //modelBuilder.Entity<Role>(entity =>
-            //{
-            //    entity.HasNoKey();
+            modelBuilder.Entity<Role>(entity =>
+            {
+                entity.HasNoKey();
 
-            //    entity.ToTable("Role");
+                entity.ToTable("Role");
 
-            //    entity.Property(e => e.AccountId).HasColumnName("accountID");
+                entity.Property(e => e.AccountId).HasColumnName("accountID");
 
-            //    entity.Property(e => e.Role1)
-            //        .HasMaxLength(255)
-            //        .IsUnicode(false)
-            //        .HasColumnName("role");
-
-            //    entity.HasOne(d => d.Account)
-            //        .WithMany()
-            //        .HasForeignKey(d => d.AccountId)
-            //        .OnDelete(DeleteBehavior.ClientSetNull)
-            //        .HasConstraintName("FK__Role__accountID__5DCAEF64");
-            //});
+                entity.Property(e => e.Role1)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("role");
+            });
 
             modelBuilder.Entity<Tour>(entity =>
             {
@@ -245,6 +246,11 @@ namespace BusinessObject.Models
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("tour_name");
+
+                entity.HasOne(d => d.TourGuide)
+                    .WithMany(p => p.Tours)
+                    .HasForeignKey(d => d.TourGuideId)
+                    .HasConstraintName("FK_Tour_TourGuide");
             });
 
             modelBuilder.Entity<TourDetail>(entity =>
@@ -284,19 +290,19 @@ namespace BusinessObject.Models
                     .WithMany(p => p.TourDetails)
                     .HasForeignKey(d => d.DestinationId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__TourDetai__desti__534D60F1");
+                    .HasConstraintName("FK__TourDetai__desti__619B8048");
 
                 entity.HasOne(d => d.Tour)
                     .WithMany(p => p.TourDetails)
                     .HasForeignKey(d => d.TourId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__TourDetai__tour___52593CB8");
+                    .HasConstraintName("FK__TourDetai__tour___60A75C0F");
 
                 entity.HasOne(d => d.Transportation)
                     .WithMany(p => p.TourDetails)
                     .HasForeignKey(d => d.TransportationId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__TourDetai__trans__5441852A");
+                    .HasConstraintName("FK__TourDetai__trans__6383C8BA");
             });
 
             modelBuilder.Entity<TourGuide>(entity =>
@@ -332,14 +338,6 @@ namespace BusinessObject.Models
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("tour_guide_phone");
-
-                entity.Property(e => e.TourId).HasColumnName("tour_id");
-
-                entity.HasOne(d => d.Tour)
-                    .WithMany(p => p.TourGuides)
-                    .HasForeignKey(d => d.TourId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__TourGuide__tour___571DF1D5");
             });
 
             modelBuilder.Entity<TourPrice>(entity =>
@@ -366,7 +364,7 @@ namespace BusinessObject.Models
                     .WithMany(p => p.TourPrices)
                     .HasForeignKey(d => d.TourId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__TourPrice__tour___59FA5E80");
+                    .HasConstraintName("FK__TourPrice__tour___6477ECF3");
             });
 
             modelBuilder.Entity<Transportation>(entity =>
